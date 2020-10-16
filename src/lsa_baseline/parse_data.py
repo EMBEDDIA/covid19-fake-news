@@ -16,7 +16,8 @@ def readValidation(path = config.PATH_VALID):
     df = pd.read_csv(path)
     del df["id"]
     print(df)
-    
+    return df
+
     
 
 if __name__ == "__main__":

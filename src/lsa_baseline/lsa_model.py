@@ -84,7 +84,7 @@ def train(data,output=False):
 
     final_feature_number = max_acc['Number of features']
     final_learner = max_acc['variable']
-    logging.info(" Final feature number: {}, final learner: {}".format(final_feature_number, final_learner))
+    logging.info("Final feature number: {}, final learner: {}".format(final_feature_number, final_learner))
     
     if final_learner == "SVM":
         index = 0        
@@ -97,6 +97,12 @@ def train(data,output=False):
     reducer = TruncatedSVD(n_components = min(dim, nfeat * len(feature_names)-1)).fit(data_matrix)
     return tokenizer, clf_final, reducer
 
+def _import(lang='en',path_in="."):
+    """Imports tokenizer,clf,reducer from param(path_in, default is ../models)"""
+    tokenizer = pickle.load(open("tokenizer_"+lang+".pkl",'rb'))
+    clf = pickle.load(open("clf_"+lang+".pkl",'rb'))
+    reducer = pickle.load(open("reducer_"+lang+".pkl",'rb'))
+    return tokenizer,clf,reducer
 
 def export():
     data = parse_data.readTrain()
@@ -108,15 +114,26 @@ def export():
     with open(os.path.join("reducer_en.pkl"),mode='wb') as f:
         pickle.dump(reducer,f)
 
-def fit(path):
+def fit(path=""):
     """Fits data from param(path), outputs xml file as out_path"""
     tokenizer,clf,reducer = _import()
-    test_texts,name_idx = parse_data.exportTest(path)
-    df_text = build_dataframe(test_texts)
+    data = parse_data.readValidation()
+    df_text = build_dataframe(data['tweet'].to_list())
+    data2 = parse_data.readTrain()
+    
+    df_text2 = build_dataframe(data2['tweet'].to_list())
+
+    matrix_form = tokenizer.transform(df_text2)
+    reduced_matrix_form = reducer.transform(matrix_form)
+    x = data2['label'].to_list() == 'real'
+    x = [1 if c  == 'real' else 0 for c in data2['label'].to_list()]
+    p = clf.fit(reduced_matrix_form, x)    
     matrix_form = tokenizer.transform(df_text)
     reduced_matrix_form = reducer.transform(matrix_form)
-    predictions = clf.predict(reduced_matrix_form)
-    
+    predictions = p.predict(reduced_matrix_form)
+    x = [1 if c  == 'real' else 0 for c in data['label'].to_list()]
+    print(f1_score(predictions, x))
             
 if __name__ == "__main__":
-    export()
+    #export()
+    fit()
