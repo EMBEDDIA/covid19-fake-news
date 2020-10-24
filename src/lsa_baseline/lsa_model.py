@@ -7,7 +7,6 @@ Created on Sat May  2 18:35:34 2020
 
 
 ## some more experiments
-import xml.etree.ElementTree as ET
 import config 
 import numpy
 import os
