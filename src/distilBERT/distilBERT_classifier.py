@@ -39,7 +39,7 @@ import time
 import datetime
 import numpy as np
 import random
-from numba import jit, cuda
+from numba import jit, cuda, vectorize
 from transformers import get_linear_schedule_with_warmup
 
 
@@ -102,12 +102,20 @@ def tokenize_dataset(text):
 
     return token_ids, attention_masks
 
-
 def train(tokenized_sentences, mask, labels):
     """
     Trains BERT classifier
     """
-    device = torch.device("cpu")
+    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    print('Using device:', device)
+    print()
+
+    #Additional Info when using cuda
+    if device.type == 'cuda':
+        print(torch.cuda.get_device_name(0))
+        print('Memory Usage:')
+        print('Allocated:', round(torch.cuda.memory_allocated(0)/1024**3,1), 'GB')
+        print('Cached:   ', round(torch.cuda.memory_cached(0)/1024**3,1), 'GB')
 
     # Use 90% for training and 10% for validation.
     train_inputs, validation_inputs, train_labels, validation_labels = train_test_split(tokenized_sentences, labels,
