@@ -5,7 +5,6 @@ Created on Fry October 23 2020
 @author: Stepišnik Perdih
 """
 
-## some more experiments
 import xml.etree.ElementTree as ET
 import config
 import numpy
@@ -23,16 +22,16 @@ import time
 import csv
 import config
 import tensorflow as tf
-from feature_construction import *
 from sklearn.metrics import accuracy_score
 from sklearn.model_selection import GridSearchCV
 import matplotlib.pyplot as plt
 import seaborn as sns
 from sklearn.decomposition import TruncatedSVD
+from keras.preprocessing.sequence import pad_sequences
 import pickle
 import nltk
 import torch
-from transformers import DistilBertModel, DistilBertConfig, DistilBertForTokenClassification, DistilBertForSequenceClassification
+from transformers import DistilBertModel, DistilBertConfig, DistilBertForTokenClassification, DistilBertForSequenceClassification, DistilBertTokenizer
 nltk.download('averaged_perceptron_tagger')
 from torch.utils.data import TensorDataset, DataLoader, RandomSampler, SequentialSampler
 from transformers import BertForSequenceClassification, AdamW, BertConfig
@@ -40,6 +39,8 @@ import time
 import datetime
 import numpy as np
 import random
+from numba import jit, cuda
+from transformers import get_linear_schedule_with_warmup
 
 
 def format_time(elapsed):
@@ -106,8 +107,6 @@ def train(tokenized_sentences, mask, labels):
     """
     Trains BERT classifier
     """
-
-
     device = torch.device("cpu")
 
     # Use 90% for training and 10% for validation.
@@ -174,7 +173,7 @@ def train(tokenized_sentences, mask, labels):
                       lr=2e-5,  # args.learning_rate - default is 5e-5, our notebook had 2e-5
                       eps=1e-8  # args.adam_epsilon  - default is 1e-8.
                       )
-    from transformers import get_linear_schedule_with_warmup
+
     # Number of training epochs (authors recommend between 2 and 4)
     epochs = 4
     # Total number of training steps is number of batches * number of epochs.
