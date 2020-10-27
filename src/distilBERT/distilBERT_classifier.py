@@ -102,10 +102,13 @@ def tokenize_dataset(text):
 
     return token_ids, attention_masks
 
+
 def train(tokenized_sentences, mask, labels):
     """
     Trains BERT classifier
     """
+    
+    print(torch.version.cuda)
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     print('Using device:', device)
     print()
@@ -207,6 +210,7 @@ def train(tokenized_sentences, mask, labels):
         # ========================================
         #               Training
         # ========================================
+
 
         # Perform one full pass over the training set.
         print("")
