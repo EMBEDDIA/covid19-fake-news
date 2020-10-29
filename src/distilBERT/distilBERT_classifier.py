@@ -109,7 +109,8 @@ def train(tokenized_sentences, mask, labels):
     """
     
     print(torch.version.cuda)
-    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    #device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    device = torch.device('cpu')
     print('Using device:', device)
     print()
 
