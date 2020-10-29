@@ -65,7 +65,7 @@ def prepare_text(texts):
     preprocessed = preprocess_texts(texts)    
     x = preprocessed.values
     docs = dict(zip(list(range(len(x))), x))
-    bert = BERTTransformer(docs, "roberta-large-nli-stsb-mean-tokens")
+    bert = BERTTransformer(docs, "xlm-roberta-base")
     bert.fit()
     x = bert.to_matrix()
     return x
@@ -101,4 +101,3 @@ data_matrix_val = prepare_text(valid['tweet'])
 
 print("VALIDATION F1-SCORE:", f1_score(clf1.predict(data_matrix_val), y)) 
     
-train()
