@@ -98,19 +98,19 @@ def train(data,output=False):
 
 def _import(lang='en',path_in="."):
     """Imports tokenizer,clf,reducer from param(path_in, default is ../models)"""
-    tokenizer = pickle.load(open("tokenizer_"+lang+".pkl",'rb'))
-    clf = pickle.load(open("clf_"+lang+".pkl",'rb'))
-    reducer = pickle.load(open("reducer_"+lang+".pkl",'rb'))
+    tokenizer = pickle.load(open(os.path.join(config.PICKLES_PATH, "tokenizer_"+lang+".pkl"),'rb'))
+    clf = pickle.load(open(os.path.join(config.PICKLES_PATH, "clf_"+lang+".pkl"),'rb'))
+    reducer = pickle.load(open(os.path.join(config.PICKLES_PATH, "reducer_"+lang+".pkl"),'rb'))
     return tokenizer,clf,reducer
 
 def export():
     data = parse_data.readTrain()
     tokenizer, clf, reducer = train(data)
-    with open(os.path.join("tokenizer_en.pkl"),mode='wb') as f:
+    with open(os.path.join(config.PICKLES_PATH, "tokenizer_en.pkl"),mode='wb') as f:
         pickle.dump(tokenizer,f)
-    with open(os.path.join("clf_en.pkl"),mode='wb') as f:
+    with open(os.path.join(config.PICKLES_PATH, "clf_en.pkl"),mode='wb') as f:
         pickle.dump(clf,f)
-    with open(os.path.join("reducer_en.pkl"),mode='wb') as f:
+    with open(os.path.join(config.PICKLES_PATH, "reducer_en.pkl"),mode='wb') as f:
         pickle.dump(reducer,f)
 
 def fit(path=""):
