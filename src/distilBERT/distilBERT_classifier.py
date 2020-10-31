@@ -14,7 +14,6 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn import svm
 from sklearn.datasets import make_classification
 from sklearn.model_selection import train_test_split
-from sklearn.metrics import f1_score
 from sklearn.model_selection import cross_val_score
 from sklearn.linear_model import LogisticRegression, SGDClassifier
 import parse_data
@@ -39,6 +38,7 @@ import time
 import datetime
 import numpy as np
 import random
+from sklearn.metrics import f1_score
 from numba import jit, cuda, vectorize
 from transformers import get_linear_schedule_with_warmup
 
@@ -335,15 +335,10 @@ def train(tokenized_sentences, mask, labels):
             logits = logits.detach().cpu().numpy()
             label_ids = b_labels.to('cpu').numpy()
 
-            # Calculate the accuracy for this batch of test sentences.
-            tmp_eval_accuracy = flat_accuracy(logits, label_ids)
-
-            # Accumulate the total accuracy.
-            eval_accuracy += tmp_eval_accuracy
             # Track the number of batches
             nb_eval_steps += 1
-        # Report the final accuracy for this validation run.
-        print("  Accuracy: {0:.2f}".format(eval_accuracy / nb_eval_steps))
+
+        print(f1_score(label_ids, logits))
         print("  Validation took: {:}".format(format_time(time.time() - t0)))
     print("")
     print("Training complete!")
@@ -354,13 +349,6 @@ def train(tokenized_sentences, mask, labels):
 
 
 
-def flat_accuracy(preds, labels):
-    """
-    Calculates the accuracy of our predictions vs labels
-    """
-    pred_flat = np.argmax(preds, axis=1).flatten()
-    labels_flat = labels.flatten()
-    return np.sum(pred_flat == labels_flat) / len(labels_flat)
 
 
 def convert_labels_to_ids(labels):
