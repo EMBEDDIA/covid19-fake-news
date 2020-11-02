@@ -163,6 +163,7 @@ def train(tokenized_sentences, mask, labels):
         output_attentions = False, # Whether the model returns attentions weights.
         output_hidden_states = False, # Whether the model returns all hidden-states.
     )
+    model.cuda()
 
 
     # Get all of the model's parameters as a list of tuples.
@@ -310,11 +311,17 @@ def train(tokenized_sentences, mask, labels):
         # Evaluate data for one epoch
         for batch in validation_dataloader:
             # Add batch to GPU
+            """
             batch = tuple(t.to(device) for t in batch)
 
             # Unpack the inputs from our dataloader
             b_input_ids, b_input_mask, b_labels = batch
-
+            """
+            
+            b_input_ids=batch[0].to(device)
+            b_input_mask=batch[1].to(device)
+            b_labels=batch[2].to(device)
+   
             # Telling the model not to compute or store gradients, saving memory and
             # speeding up validation
             with torch.no_grad():
