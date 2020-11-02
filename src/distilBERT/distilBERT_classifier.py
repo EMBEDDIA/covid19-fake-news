@@ -109,8 +109,8 @@ def train(tokenized_sentences, mask, labels):
     """
     
     print(torch.version.cuda)
-    #device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-    device = torch.device('cpu')
+    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    #device = torch.device('cpu')
     print('Using device:', device)
     print()
 
@@ -244,7 +244,9 @@ def train(tokenized_sentences, mask, labels):
             #   [0]: input ids
             #   [1]: attention masks
             #   [2]: labels
-            b_input_ids = batch[0].to(device)
+            b_input_ids = batch[0]
+            b_input_ids = b_input_ids.type(torch.LongTensor)
+            b_input_ids = b_input_ids.to(device)
             b_input_mask = batch[1].to(device)
             b_labels = batch[2].to(device)
             # Always clear any previously calculated gradients before performing a
@@ -257,8 +259,7 @@ def train(tokenized_sentences, mask, labels):
             # have provided the `labels`.
             # The documentation for this `model` function is here:
             # https://huggingface.co/transformers/v2.2.0/model_doc/bert.html#transformers.BertForSequenceClassification
-            print(type(b_input_ids))
-            b_input_ids = b_input_ids.type(torch.LongTensor)
+
             outputs = model(b_input_ids,
                             token_type_ids=None,
                             attention_mask=b_input_mask,
@@ -344,7 +345,7 @@ def train(tokenized_sentences, mask, labels):
     print("Training complete!")
 
     ## save model with pickle
-    with open(os.path.join("clf_en.pkl"), mode='wb') as f:
+    with open(os.path.join("/pickles/clf_en.pkl"), mode='wb') as f:
         pickle.dump(model, f)
 
 
