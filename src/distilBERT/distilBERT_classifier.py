@@ -345,7 +345,7 @@ def train(tokenized_sentences, mask, labels):
     print("Training complete!")
 
     ## save model with pickle
-    with open(os.path.join("/pickles/clf_en.pkl"), mode='wb') as f:
+    with open(os.path.join("clf_en.pkl"), mode='wb') as f:
         pickle.dump(model, f)
 
 
