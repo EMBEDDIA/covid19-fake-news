@@ -309,6 +309,8 @@ def train(tokenized_sentences, mask, labels):
         eval_loss, eval_accuracy = 0, 0
         nb_eval_steps, nb_eval_examples = 0, 0
         # Evaluate data for one epoch
+        preds = []
+        orgs = []
         for batch in validation_dataloader:
             # Add batch to GPU
             """
@@ -341,12 +343,15 @@ def train(tokenized_sentences, mask, labels):
             logits = outputs[0]
             # Move logits and labels to CPU
             logits = logits.detach().cpu().numpy()
+            guessed = np.argmax(logits,axis=1)
+            print(guessed)
             label_ids = b_labels.to('cpu').numpy()
-
+            preds = preds + guessed.tolist()
+            orgs = orgs + label_ids.tolist()
             # Track the number of batches
             nb_eval_steps += 1
-
-        print(f1_score(label_ids, logits))
+        print(f1_score(preds, orgs))
+        print(label_ids)
         print("  Validation took: {:}".format(format_time(time.time() - t0)))
     print("")
     print("Training complete!")
