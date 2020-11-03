@@ -24,4 +24,5 @@
 |----------|:-------------:|:------:|------:|
 | TFIDF_LSA |  [LSA](./src/lsa_baseline/README.md) | 0.944 (avg 10-fold CV)  | 0.931 |
 | Stloymetric features | [handcrafted-features](./src/statistical_baseline/README.md) |    0.787 |0.803 |
+| linear_SVM | Tax2Vec + tf-idf |     | 0.949 |  
 
