@@ -103,7 +103,7 @@ def tokenize_dataset(text):
     return token_ids, attention_masks
 
 
-def train(tokenized_sentences, mask, labels):
+def train(tokenized_sentences, mask, labels, validation_tokenized_sentences, validation_masks, validation_labels):
     """
     Trains BERT classifier
     """
@@ -121,21 +121,14 @@ def train(tokenized_sentences, mask, labels):
         print('Allocated:', round(torch.cuda.memory_allocated(0)/1024**3,1), 'GB')
         print('Cached:   ', round(torch.cuda.memory_cached(0)/1024**3,1), 'GB')
 
-    # Use 90% for training and 10% for validation.
-    train_inputs, validation_inputs, train_labels, validation_labels = train_test_split(tokenized_sentences, labels,
-                                                                                        random_state=2018,
-                                                                                        test_size=0.1)
-    # Do the same for the masks.
-    train_masks, validation_masks, _, _ = train_test_split(mask, labels,
-                                                           random_state=2018, test_size=0.1)
 
     # Convert all inputs and labels into torch tensors, the required datatype
     # for our model.
-    train_inputs = torch.tensor(train_inputs)
-    validation_inputs = torch.tensor(validation_inputs)
-    train_labels = torch.tensor(train_labels)
+    train_inputs = torch.tensor(tokenized_sentences)
+    validation_inputs = torch.tensor(validation_tokenized_sentences)
+    train_labels = torch.tensor(labels)
     validation_labels = torch.tensor(validation_labels)
-    train_masks = torch.tensor(train_masks)
+    train_masks = torch.tensor(mask)
     validation_masks = torch.tensor(validation_masks)
 
 
@@ -366,7 +359,7 @@ def train(tokenized_sentences, mask, labels):
 
 def convert_labels_to_ids(labels):
     """
-    converts labels to integer IDs
+    Converts labels to integer IDs
     """
     label_to_id = {}
     counter = 0
@@ -384,6 +377,8 @@ def convert_labels_to_ids(labels):
 if __name__ == "__main__":
     train_set, valid_set = load_dataset()
     tokenized_sentences, attention_mask = tokenize_dataset(train_set)
+    validation_tokenized_sentences, validation_masks = tokenize_dataset(valid_set)
     labels = convert_labels_to_ids(train_set['label'])
-    train(tokenized_sentences, attention_mask, labels)
+    validation_labels = convert_labels_to_ids(valid_set['label'])
+    train(tokenized_sentences, attention_mask, labels, validation_tokenized_sentences, validation_masks, validation_labels)
 
