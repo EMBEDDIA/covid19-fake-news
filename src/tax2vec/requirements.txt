@@ -1,0 +1,8 @@
+seaborn==0.10.1
+pandas==0.25.3
+matplotlib==3.2.2
+numpy==1.16.2
+nltk==3.4.5
+scikit_learn==0.23.2
+tax2vec==0.25
+tensorflow==2.3.1
