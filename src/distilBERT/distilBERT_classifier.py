@@ -5,7 +5,6 @@ Created on Fry October 23 2020
 @author: Stepišnik Perdih
 """
 
-## some more experiments
 import xml.etree.ElementTree as ET
 import config
 import numpy
@@ -15,7 +14,6 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn import svm
 from sklearn.datasets import make_classification
 from sklearn.model_selection import train_test_split
-from sklearn.metrics import f1_score
 from sklearn.model_selection import cross_val_score
 from sklearn.linear_model import LogisticRegression, SGDClassifier
 import parse_data
@@ -23,16 +21,16 @@ import time
 import csv
 import config
 import tensorflow as tf
-from feature_construction import *
 from sklearn.metrics import accuracy_score
 from sklearn.model_selection import GridSearchCV
 import matplotlib.pyplot as plt
 import seaborn as sns
 from sklearn.decomposition import TruncatedSVD
+from keras.preprocessing.sequence import pad_sequences
 import pickle
 import nltk
 import torch
-from transformers import DistilBertModel, DistilBertConfig, DistilBertForTokenClassification, DistilBertForSequenceClassification
+from transformers import DistilBertModel, DistilBertConfig, DistilBertForTokenClassification, DistilBertForSequenceClassification, DistilBertTokenizer
 nltk.download('averaged_perceptron_tagger')
 from torch.utils.data import TensorDataset, DataLoader, RandomSampler, SequentialSampler
 from transformers import BertForSequenceClassification, AdamW, BertConfig
@@ -40,6 +38,9 @@ import time
 import datetime
 import numpy as np
 import random
+from sklearn.metrics import f1_score
+from numba import jit, cuda, vectorize
+from transformers import get_linear_schedule_with_warmup
 
 
 def format_time(elapsed):
@@ -102,29 +103,32 @@ def tokenize_dataset(text):
     return token_ids, attention_masks
 
 
-def train(tokenized_sentences, mask, labels):
+def train(tokenized_sentences, mask, labels, validation_tokenized_sentences, validation_masks, validation_labels):
     """
     Trains BERT classifier
     """
+    
+    print(torch.version.cuda)
+    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    #device = torch.device('cpu')
+    print('Using device:', device)
+    print()
 
+    #Additional Info when using cuda
+    if device.type == 'cuda':
+        print(torch.cuda.get_device_name(0))
+        print('Memory Usage:')
+        print('Allocated:', round(torch.cuda.memory_allocated(0)/1024**3,1), 'GB')
+        print('Cached:   ', round(torch.cuda.memory_cached(0)/1024**3,1), 'GB')
 
-    device = torch.device("cpu")
-
-    # Use 90% for training and 10% for validation.
-    train_inputs, validation_inputs, train_labels, validation_labels = train_test_split(tokenized_sentences, labels,
-                                                                                        random_state=2018,
-                                                                                        test_size=0.1)
-    # Do the same for the masks.
-    train_masks, validation_masks, _, _ = train_test_split(mask, labels,
-                                                           random_state=2018, test_size=0.1)
 
     # Convert all inputs and labels into torch tensors, the required datatype
     # for our model.
-    train_inputs = torch.tensor(train_inputs)
-    validation_inputs = torch.tensor(validation_inputs)
-    train_labels = torch.tensor(train_labels)
+    train_inputs = torch.tensor(tokenized_sentences)
+    validation_inputs = torch.tensor(validation_tokenized_sentences)
+    train_labels = torch.tensor(labels)
     validation_labels = torch.tensor(validation_labels)
-    train_masks = torch.tensor(train_masks)
+    train_masks = torch.tensor(mask)
     validation_masks = torch.tensor(validation_masks)
 
 
@@ -152,6 +156,7 @@ def train(tokenized_sentences, mask, labels):
         output_attentions = False, # Whether the model returns attentions weights.
         output_hidden_states = False, # Whether the model returns all hidden-states.
     )
+    model.cuda()
 
 
     # Get all of the model's parameters as a list of tuples.
@@ -174,7 +179,7 @@ def train(tokenized_sentences, mask, labels):
                       lr=2e-5,  # args.learning_rate - default is 5e-5, our notebook had 2e-5
                       eps=1e-8  # args.adam_epsilon  - default is 1e-8.
                       )
-    from transformers import get_linear_schedule_with_warmup
+
     # Number of training epochs (authors recommend between 2 and 4)
     epochs = 4
     # Total number of training steps is number of batches * number of epochs.
@@ -200,6 +205,7 @@ def train(tokenized_sentences, mask, labels):
         # ========================================
         #               Training
         # ========================================
+
 
         # Perform one full pass over the training set.
         print("")
@@ -232,7 +238,9 @@ def train(tokenized_sentences, mask, labels):
             #   [0]: input ids
             #   [1]: attention masks
             #   [2]: labels
-            b_input_ids = batch[0].to(device)
+            b_input_ids = batch[0]
+            b_input_ids = b_input_ids.type(torch.LongTensor)
+            b_input_ids = b_input_ids.to(device)
             b_input_mask = batch[1].to(device)
             b_labels = batch[2].to(device)
             # Always clear any previously calculated gradients before performing a
@@ -245,8 +253,7 @@ def train(tokenized_sentences, mask, labels):
             # have provided the `labels`.
             # The documentation for this `model` function is here:
             # https://huggingface.co/transformers/v2.2.0/model_doc/bert.html#transformers.BertForSequenceClassification
-            print(type(b_input_ids))
-            b_input_ids = b_input_ids.type(torch.LongTensor)
+
             outputs = model(b_input_ids,
                             token_type_ids=None,
                             attention_mask=b_input_mask,
@@ -295,13 +302,21 @@ def train(tokenized_sentences, mask, labels):
         eval_loss, eval_accuracy = 0, 0
         nb_eval_steps, nb_eval_examples = 0, 0
         # Evaluate data for one epoch
+        preds = []
+        orgs = []
         for batch in validation_dataloader:
             # Add batch to GPU
+            """
             batch = tuple(t.to(device) for t in batch)
 
             # Unpack the inputs from our dataloader
             b_input_ids, b_input_mask, b_labels = batch
-
+            """
+            
+            b_input_ids=batch[0].to(device)
+            b_input_mask=batch[1].to(device)
+            b_labels=batch[2].to(device)
+   
             # Telling the model not to compute or store gradients, saving memory and
             # speeding up validation
             with torch.no_grad():
@@ -321,17 +336,15 @@ def train(tokenized_sentences, mask, labels):
             logits = outputs[0]
             # Move logits and labels to CPU
             logits = logits.detach().cpu().numpy()
+            guessed = np.argmax(logits,axis=1)
+            print(guessed)
             label_ids = b_labels.to('cpu').numpy()
-
-            # Calculate the accuracy for this batch of test sentences.
-            tmp_eval_accuracy = flat_accuracy(logits, label_ids)
-
-            # Accumulate the total accuracy.
-            eval_accuracy += tmp_eval_accuracy
+            preds = preds + guessed.tolist()
+            orgs = orgs + label_ids.tolist()
             # Track the number of batches
             nb_eval_steps += 1
-        # Report the final accuracy for this validation run.
-        print("  Accuracy: {0:.2f}".format(eval_accuracy / nb_eval_steps))
+        print(f1_score(preds, orgs))
+        print(label_ids)
         print("  Validation took: {:}".format(format_time(time.time() - t0)))
     print("")
     print("Training complete!")
@@ -342,18 +355,11 @@ def train(tokenized_sentences, mask, labels):
 
 
 
-def flat_accuracy(preds, labels):
-    """
-    Calculates the accuracy of our predictions vs labels
-    """
-    pred_flat = np.argmax(preds, axis=1).flatten()
-    labels_flat = labels.flatten()
-    return np.sum(pred_flat == labels_flat) / len(labels_flat)
 
 
 def convert_labels_to_ids(labels):
     """
-    converts labels to integer IDs
+    Converts labels to integer IDs
     """
     label_to_id = {}
     counter = 0
@@ -371,6 +377,8 @@ def convert_labels_to_ids(labels):
 if __name__ == "__main__":
     train_set, valid_set = load_dataset()
     tokenized_sentences, attention_mask = tokenize_dataset(train_set)
+    validation_tokenized_sentences, validation_masks = tokenize_dataset(valid_set)
     labels = convert_labels_to_ids(train_set['label'])
-    train(tokenized_sentences, attention_mask, labels)
+    validation_labels = convert_labels_to_ids(valid_set['label'])
+    train(tokenized_sentences, attention_mask, labels, validation_tokenized_sentences, validation_masks, validation_labels)
 
