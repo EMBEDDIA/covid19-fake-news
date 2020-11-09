@@ -24,4 +24,6 @@
 |----------|:-------------:|:------:|------:|
 | TFIDF_LSA |  [LSA](./src/lsa_baseline/README.md) | 0.944 (avg 10-fold CV)  | 0.931 |
 | Stloymetric features | [handcrafted-features](./src/statistical_baseline/README.md) |    0.787 |0.803 |
-
+| sentence_bert | [distilbert-base-nli-mean-tokens](./src/sentence_bert/sentence_transformers/README.md) | 0.949 |  0.912 |
+| sentence_bert | [roberta-large-nli-stsb-mean-tokens](./src/sentence_bert/sentence_transformers/README.md) | 0.953 |  0.919 |
+| sentence_bert | [xlm-roberta-base](./src/sentence_bert/sentence_transformers/README.md) | 0.959 |  0.906 |
