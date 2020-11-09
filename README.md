@@ -27,4 +27,5 @@
 | sentence_bert | [distilbert-base-nli-mean-tokens](./src/sentence_bert/sentence_transformers/README.md) | 0.949 |  0.912 |
 | sentence_bert | [roberta-large-nli-stsb-mean-tokens](./src/sentence_bert/sentence_transformers/README.md) | 0.953 |  0.919 |
 | sentence_bert | [xlm-roberta-base](./src/sentence_bert/sentence_transformers/README.md) | 0.959 |  0.906 |
-| linear_SVM | Tax2Vec + tf-idf |     | 0.949 |  
+| linear_SVM | [Tax2Vec-+-tf-idf](./src/tax2vec/README.md) |     | 0.949 |  
+| distilBERT | [distilBERT-tokenizer](./src/distilBERT/README.md) | 0.978 |  |  
