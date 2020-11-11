@@ -26,7 +26,7 @@ from tax2vec.preprocessing import *
 from tax2vec.models import *
 
 
-def get_features(data_train, data_validation):
+def train(data_train, data_validation):
     ## generate learning examples
     num_splits = 1
 
