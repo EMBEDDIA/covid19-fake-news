@@ -24,15 +24,15 @@ from preprocessing import *
 import tax2vec
 from tax2vec.preprocessing import *
 from tax2vec.models import *
-
+from scipy.sparse import coo_matrix, hstack
 
 def get_features(text_list, tokenizer, tax2vec_instance):
     features_all = []
-    semantic_features_test = tax2vec_instance.transform(text_list)
+    semantic_features_test = tax2vec_instance.transform(text_list)          
     features_all.append(semantic_features_test)
     tfidf_features = tokenizer.transform(build_dataframe(text_list))
     features_all.append(tfidf_features)
-    features = np.hstack(features_all)    
+    features = hstack((features_all))    
     return features
     
 def train(train_data = parse_data.get_train(), dev_data = parse_data.get_dev()):
@@ -48,7 +48,7 @@ def train(train_data = parse_data.get_train(), dev_data = parse_data.get_dev()):
             tax2vec_instance = tax2vec.tax2vec(
                 max_features=num_features,
                 targets=train_y,
-                num_cpu=8,
+                num_cpu="all",
                 heuristic="closeness_centrality",
                 class_names=list(set(train_y))
                 )            
@@ -59,12 +59,13 @@ def train(train_data = parse_data.get_train(), dev_data = parse_data.get_dev()):
             features_train = get_features(train_texts, tokenizer, tax2vec_instance)
             features_dev = get_features(dev_texts, tokenizer, tax2vec_instance)
             
+            print(features_train)
             with open("features_train","wb") as f:
                 pickle.dump(features_train,f)
 
             with open("features_dev","wb") as f:
                 pickle.dump(features_dev,f)
-
+            return
             model = learn(features_train, train_y)
             score = evaluate(model,features_dev, dev_y)
             tax2vec_dict[score] = (tax2vec_instance, tokenizer, model)
@@ -85,6 +86,7 @@ def export():
 
 
 def learn(train_matrix, train_y):
+    #train_matrix = hstack((train_matrix[0],train_matrix[1]))
     parameters = {"C":[0.1,1,10,25,50,100,500],"penalty":["l1","l2"]}
     lr_learner = LogisticRegression(max_iter = 100000,  solver="saga")
     gs = GridSearchCV(lr_learner, parameters, verbose = 0, n_jobs = 8,cv = 10, refit = True)
@@ -123,7 +125,24 @@ def evaluate(clf, X, test_y):
 
 if __name__ == "__main__":
     
-    tax2vec_instance, tokenizer, model = train()
+    train_data = parse_data.get_train()
+    dev_data = parse_data.get_dev()
+    train_texts = train_data["text_a"].to_list()
+    train_y = train_data['label'].to_list()
+    
+    dev_texts = dev_data["text_a"].to_list()
+    dev_y = dev_data['label'].to_list()
+   
+    features_train = []
+    features_dev = []
+    with open("features_train","rb") as f:
+        features_train = pickle.load(f)
+
+    with open("features_dev","rb") as f:
+        features_dev = pickle.load(f)
+        
+    model = learn(features_train, train_y)
+    score = evaluate(model,features_dev, dev_y)
     """
     data_validation = parse_data.readValidation()
     data_train = parse_data.readTrain()
