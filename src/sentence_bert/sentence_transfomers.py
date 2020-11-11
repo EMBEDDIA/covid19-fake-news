@@ -7,9 +7,11 @@ Created on Sat Oct 17 8:27:03 2020
 
 
 import config
+import logging
 import parse_data
 import numpy as np
 import pickle
+import os
 from sentence_transformers import SentenceTransformer
 import feature_construction
 from sklearn import preprocessing
@@ -21,10 +23,8 @@ from sklearn.model_selection import train_test_split
 from sklearn.metrics import f1_score
 from sklearn.model_selection import cross_val_score
 from sklearn.linear_model import LogisticRegression, SGDClassifier
-from sklearn.metrics import accuracy_score
 from sklearn.model_selection import GridSearchCV
 from sklearn.metrics import f1_score
-from sklearn.linear_model import LogisticRegressionCV
 
 #BERT
 class BERTTransformer():
@@ -49,7 +49,6 @@ class BERTTransformer():
         self.X = pickle.load(open(path,'rb'))
         return self.X
     
-
     def _export(self,path="bert_transfomer.pkl"):
         pickle.dump(self._model, open(path, "wb"))
 
@@ -70,34 +69,43 @@ def prepare_text(texts):
     x = bert.to_matrix()
     return x
 
-def train():
-    train = parse_data.readTrain()
-    x = prepare_text(train['tweet'].tolist())
-    y = train['label'].tolist()       
-    return x, y    
-
-
-data_matrix, y = train()
-print(data_matrix.shape)
-
-"""
-clf1 = GridSearchCV(x, parameters, n_jobs = -1,cv = 10, verbose = True, refit = True)
-scores = cross_val_score(clf1, data_matrix, y, cv=10, scoring='f1_macro', verbose = True, n_jobs = -1)
-
-clf1 = clf1.fit(data_matrix, y)
-"""
-
-y = [1 if c  == 'real' else 0 for c in y]
-
-
-
-clf1 = LogisticRegressionCV(cv=10, penalty='l2', fit_intercept=True, scoring='f1').fit(data_matrix, y)
-
-
-print("AVG F1-score:" + str(clf1.score(data_matrix,y)))
-valid = parse_data.readValidation()
-y = [1 if c  == 'real' else 0 for c in valid['label'].to_list()]
-data_matrix_val = prepare_text(valid['tweet'])
-
-print("VALIDATION F1-SCORE:", f1_score(clf1.predict(data_matrix_val), y)) 
+def train(train_data = parse_data.get_train(), dev_data = parse_data.get_dev()):
+    #Prepare the train data
+    train_texts = train_data["text_a"].to_list()
+    train_y = train_data['label'].to_list()
+    train_matrix = prepare_text(train_texts) 
+    del train_texts       
+       
+    parameters = {"C":[0.1,1,10,25,50,100,500],"penalty":["l1","l2"]}
+    lr_learner = LogisticRegression(max_iter = 100000,  solver="saga")
+    gs = GridSearchCV(lr_learner, parameters, verbose = 0, n_jobs = 8,cv = 10, refit = True)
+    gs.fit(train_matrix, train_y)
+    clf = gs.best_estimator_
+    scores = cross_val_score(clf, train_matrix, train_y, cv=10, scoring='f1_macro')
+    logging.info("TRAIN SGD 10fCV F1-score: %0.2f (+/- %0.2f)" % (scores.mean(), scores.std() * 2))
     
+    #Train the dev data
+    dev_texts = dev_data["text_a"].to_list()
+    dev_y = dev_data['label'].to_list()
+    dev_matrix = prepare_text(dev_texts) 
+    del dev_texts
+    
+    #Evaluate the dev data
+    predictions = clf.predict(dev_matrix)
+    acc_svm = f1_score(predictions, dev_y)
+    logging.info("DEV SGD dataset prediction: %0.2f" % acc_svm)
+
+    # Prepare output
+    fitted = clf.fit(train_matrix, dev_matrix)
+    with open(os.path.join(config.PICKLES_PATH, "clf.pkl"), "wb") as f:
+        pickle.dump(fitted, f)
+    return fitted
+
+
+def fit(model=train(), test_data=parse_data.get_test()):
+    X = test_data["text_a"].to_list()
+    orig = test_data['label'].to_list()
+    preds = model.predict(X)
+    print(f1_score(orig,preds))
+
+fit()
