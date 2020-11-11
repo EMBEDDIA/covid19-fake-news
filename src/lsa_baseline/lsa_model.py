@@ -7,6 +7,7 @@ Created on Sat May  2 18:35:34 2020
 
 
 ## some more experiments
+
 import config 
 import numpy
 import os
@@ -23,7 +24,6 @@ import time
 import csv
 import config 
 from feature_construction import *
-from sklearn.metrics import accuracy_score
 from sklearn.model_selection import GridSearchCV
 import matplotlib.pyplot as plt
 import seaborn as sns
@@ -35,37 +35,79 @@ try:
 except:
     pass
 
-def train(data,output=False):
-    final_y = data["label"].to_list()
-    final_texts = data["tweet"].to_list()
-        
+def fit(X, model_path="."):
+    df_final = build_dataframe(X)
+    tokenizer,clf,reducer = _import(lang="",path_in=model_path)
+    matrix_form = tokenizer.transform(df_final)
+    reduced_matrix_form = reducer.transform(matrix_form)
+    predictions = clf.predict(reduced_matrix_form)    
+    return predictions
+
+def evaluate(test_data=parse_data.get_test()):
+    X = test_data["text_a"].to_list()
+    orig = test_data['label'].to_list()
+    preds = fit(X)
+    print(f1_score(orig,preds))
+    
+def train(train_data, dev_data, output=False):
+    final_texts = train_data["text_a"].to_list()
+    final_y = train_data['label'].to_list()
+    
+    dev_texts = dev_data["text_a"].to_list()
+    dev_y = dev_data['label'].to_list()
+
     dataframe = build_dataframe(final_texts)
-    print(dataframe)
+    dataframe_dev = build_dataframe(dev_texts)
+    
     report = []
 
     trained_models = {}
     
     for nrep in range(1):
-        for nfeat in [2500,5000,10000,15000]:
-            for dim in [256,512,768]:
+        for nfeat in [2500]:#5000,10000,15000]:
+            for dim in [256]:# ,512,768]:
+                
+                #"Prepare train"
+                
                 tokenizer, feature_names, data_matrix = get_features(dataframe, max_num_feat = nfeat, labels = final_y)
                 reducer = TruncatedSVD(n_components = min(dim, nfeat * len(feature_names)-1))
                 data_matrix = reducer.fit_transform(data_matrix)
+                
+                #"Prepare dev"
+                matrix_form = tokenizer.transform(dataframe_dev)
+                dev_matrix = reducer.fit_transform(matrix_form)
+                print(data_matrix.shape)
+                print(dev_matrix.shape)
+                
+                #"Train SGD"
                 logging.info("Generated {} features.".format(nfeat*len(feature_names)))
                 parameters = {"loss":["hinge","log"],"penalty":["elasticnet"],"alpha":[0.01,0.001,0.0001,0.0005],"l1_ratio":[0.05,0.25,0.3,0.6,0.8,0.95],"power_t":[0.5,0.1,0.9]}
                 svc = SGDClassifier()
-                clf1 = GridSearchCV(svc, parameters, verbose = 0, n_jobs = 8,cv = 10, refit = True)
+                gs1 = GridSearchCV(svc, parameters, verbose = 0, n_jobs = 8,cv = 10, refit = True)
+                gs1.fit(data_matrix, final_y)
+                clf1 = gs1.best_estimator_
+                
                 scores = cross_val_score(clf1, data_matrix, final_y, cv=10, scoring='f1_macro')
                 acc_svm = scores.mean()
-                logging.info("SGD 10fCV F1-score: %0.2f (+/- %0.2f)" % (scores.mean(), scores.std() * 2))
+                logging.info("TRAIN SGD 10fCV F1-score: %0.2f (+/- %0.2f)" % (scores.mean(), scores.std() * 2))
+                #Fit the classifier
+                predictions = clf1.predict(dev_matrix)
+                acc_svm = f1_score(predictions, dev_y)
+                logging.info("DEV SGD dataset prediction: %0.2f" % acc_svm)
 
+                #"Train LSA"
                 parameters = {"C":[0.1,1,10,25,50,100,500],"penalty":["l2"]}
-                svc = LogisticRegression(max_iter = 100000)
-                clf2 = GridSearchCV(svc, parameters, verbose = 0, n_jobs = 8,cv = 10, refit = True)
+                svc = LogisticRegression(max_iter = 100000,  solver="lbfgs")
+                gs2 = GridSearchCV(svc, parameters, verbose = 0, n_jobs = 8,cv = 10, refit = True)
+                gs2.fit(data_matrix, final_y)
+                clf2 = gs2.best_estimator_
+
                 scores = cross_val_score(clf2, data_matrix, final_y, cv=10, scoring='f1_macro')
-                logging.info("LR 10fCV F1-score: %0.2f (+/- %0.2f)" % (scores.mean(), scores.std() * 2))
-                
-                acc_lr = scores.mean()
+                logging.info("TRALR 10fCV F1-score: %0.2f (+/- %0.2f)" % (scores.mean(), scores.std() * 2))
+                predictions2 = clf2.predict(dev_matrix)
+                acc_lr = f1_score(predictions2, dev_y)
+                logging.info("DEV LR dataset prediction: %0.2f" % acc_lr)
+                              
                 trained_models[nfeat] = ((clf1, clf2), dim)
                 report.append([nfeat, acc_lr, acc_svm])
                 
@@ -85,15 +127,15 @@ def train(data,output=False):
     final_learner = max_acc['variable']
     logging.info("Final feature number: {}, final learner: {}".format(final_feature_number, final_learner))
     
-    if final_learner == "SVM":
-        index = 0        
-    else:
-        index = 1
-
+    index = 0 if final_learner == "SVM" else 1
+    
     clf_final, dim = trained_models[final_feature_number]
     clf_final = clf_final[index]
+
     tokenizer, feature_names, data_matrix = get_features(dataframe, max_num_feat = final_feature_number)
     reducer = TruncatedSVD(n_components = min(dim, nfeat * len(feature_names)-1)).fit(data_matrix)
+    clf_final = clf_final.fit(reducer.transform(data_matrix), final_y)
+    print(hasattr(clf_final, "classes_"))
     return tokenizer, clf_final, reducer
 
 def _import(lang='en',path_in="."):
@@ -105,15 +147,15 @@ def _import(lang='en',path_in="."):
 
 def export():
     data = parse_data.readTrain()
-    tokenizer, clf, reducer = train(data)
-    with open(os.path.join(config.PICKLES_PATH, "tokenizer_en.pkl"),mode='wb') as f:
+    tokenizer, clf, reducer = train(parse_data.get_train(), parse_data.get_dev())
+    with open(os.path.join(config.PICKLES_PATH, "tokenizer_.pkl"),mode='wb') as f:
         pickle.dump(tokenizer,f)
-    with open(os.path.join(config.PICKLES_PATH, "clf_en.pkl"),mode='wb') as f:
+    with open(os.path.join(config.PICKLES_PATH, "clf_.pkl"),mode='wb') as f:
         pickle.dump(clf,f)
-    with open(os.path.join(config.PICKLES_PATH, "reducer_en.pkl"),mode='wb') as f:
+    with open(os.path.join(config.PICKLES_PATH, "reducer_.pkl"),mode='wb') as f:
         pickle.dump(reducer,f)
 
-def fit(path=""):
+def _fit(path=""):
     """Fits data from param(path), outputs xml file as out_path"""
     tokenizer,clf,reducer = _import()
     data = parse_data.readValidation()
@@ -134,5 +176,5 @@ def fit(path=""):
     print(f1_score(predictions, x))
             
 if __name__ == "__main__":
-    #export()
-    fit()
+    export()
+    evaluate()
