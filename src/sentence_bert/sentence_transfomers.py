@@ -60,11 +60,11 @@ def preprocess_texts(docs):
     dataframe = feature_construction.build_dataframe(docs)
     return dataframe['no_stopwords']
     
-def prepare_text(texts):
+def prepare_text(texts, model = "distilbert-base-nli-mean-tokens"):
     preprocessed = preprocess_texts(texts)    
     x = preprocessed.values
     docs = dict(zip(list(range(len(x))), x))
-    bert = BERTTransformer(docs, "xlm-roberta-base")
+    bert = BERTTransformer(docs, model) #"xlm-roberta-base")
     bert.fit()
     x = bert.to_matrix()
     return x
