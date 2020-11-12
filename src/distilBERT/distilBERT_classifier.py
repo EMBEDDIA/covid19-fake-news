@@ -59,8 +59,8 @@ def load_dataset():
     Loads train and validation sets from .csv file
     """
     print("Loading dataset...")
-    train_set = parse_data.readTrain()
-    valid_set = parse_data.readValidation()
+    train_set = parse_data.get_train()
+    valid_set = parse_data.get_dev()
     print("Dataset loaded")
 
     return train_set, valid_set
@@ -72,7 +72,7 @@ def tokenize_dataset(text):
     print("Loading BERT tokenizer...")
     tokenizer = DistilBertTokenizer.from_pretrained('distilbert-base-uncased')
     token_ids = []
-    for sentence in text['tweet']:
+    for sentence in text['text_a']:
         if(len(sentence) > 512):
             sentence = sentence[:512]
         tokens = tokenizer.encode(sentence, add_special_tokens=True)
@@ -183,7 +183,7 @@ def train(tokenized_sentences, mask, labels, validation_tokenized_sentences, val
                       )
 
     # Number of training epochs (authors recommend between 2 and 4)
-    epochs = 4
+    epochs = 2
     # Total number of training steps is number of batches * number of epochs.
     total_steps = len(train_dataloader) * epochs
     # Create the learning rate scheduler.
