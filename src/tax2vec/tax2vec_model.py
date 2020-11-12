@@ -25,6 +25,7 @@ import tax2vec
 from tax2vec.preprocessing import *
 from tax2vec.models import *
 from scipy.sparse import coo_matrix, hstack
+from skopt import BayesSearchCV
 
 def get_features(text_list, tokenizer, tax2vec_instance):
     features_all = []
@@ -89,9 +90,10 @@ def learn(train_matrix, train_y):
     #train_matrix = hstack((train_matrix[0],train_matrix[1]))
     parameters = {"C":[0.1,1,10,25,50,100,500],"penalty":["l1","l2"]}
     lr_learner = LogisticRegression(max_iter = 100000,  solver="saga")
-    gs = GridSearchCV(lr_learner, parameters, verbose = 0, n_jobs = 8,cv = 10, refit = True)
-    gs.fit(train_matrix, train_y)
-    clf = gs.best_estimator_
+    #gs = GridSearchCV(lr_learner, parameters, verbose = 0, n_jobs = 8,cv = 10, refit = True)
+    bs = BayesSearchCV(estimator=lr_learner, search_spaces=parameters, n_jobs=-8, cv=10)
+    bs.fit(train_matrix, train_y)
+    clf = bs.best_estimator_
     scores = cross_val_score(clf, train_matrix, train_y, cv=10, scoring='f1_macro')
     print("TRAIN SGD 10fCV F1-score: %0.2f (+/- %0.2f)" % (scores.mean(), scores.std() * 2))
     return clf.fit(train_matrix, train_y)
