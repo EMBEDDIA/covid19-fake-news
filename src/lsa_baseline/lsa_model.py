@@ -64,8 +64,8 @@ def train(train_data, dev_data, output=False):
     trained_models = {}
     
     for nrep in range(1):
-        for nfeat in [2500, 5000, 10000, 15000]:
-            for dim in [256, 512, 768]:
+        for nfeat in [500, 1250, 2500, 5000, 10000, 15000, 20000]:
+            for dim in [64,128, 256, 512, 768]:
                 
                 #"Prepare train"
                 

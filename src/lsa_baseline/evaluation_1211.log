@@ -1,0 +1,94 @@
+(4778, 256)
+(1555, 256)
+12-Nov-20 10:46:01 - Generated 5000 features.
+12-Nov-20 10:46:40 - TRAIN SGD 10fCV F1-score: 0.92 (+/- 0.02)
+12-Nov-20 10:46:40 - DEV SGD dataset prediction: 0.77
+12-Nov-20 10:46:47 - TRAIN LR 10fCV F1-score: 0.92 (+/- 0.03)
+12-Nov-20 10:46:47 - DEV LR dataset prediction: 0.76
+(4778, 512)
+(1555, 512)
+12-Nov-20 10:46:55 - Generated 5000 features.
+12-Nov-20 10:48:05 - TRAIN SGD 10fCV F1-score: 0.92 (+/- 0.03)
+12-Nov-20 10:48:05 - DEV SGD dataset prediction: 0.75
+12-Nov-20 10:48:23 - TRAIN LR 10fCV F1-score: 0.92 (+/- 0.02)
+12-Nov-20 10:48:23 - DEV LR dataset prediction: 0.75
+(4778, 768)
+(1555, 768)
+12-Nov-20 10:48:35 - Generated 5000 features.
+12-Nov-20 10:50:19 - TRAIN SGD 10fCV F1-score: 0.92 (+/- 0.03)
+12-Nov-20 10:50:19 - DEV SGD dataset prediction: 0.75
+12-Nov-20 10:50:48 - TRAIN LR 10fCV F1-score: 0.92 (+/- 0.02)
+12-Nov-20 10:50:48 - DEV LR dataset prediction: 0.76
+(4778, 256)
+(1555, 256)
+12-Nov-20 10:50:53 - Generated 10000 features.
+12-Nov-20 10:51:30 - TRAIN SGD 10fCV F1-score: 0.92 (+/- 0.03)
+12-Nov-20 10:51:30 - DEV SGD dataset prediction: 0.75
+12-Nov-20 10:51:36 - TRAIN LR 10fCV F1-score: 0.92 (+/- 0.03)
+12-Nov-20 10:51:36 - DEV LR dataset prediction: 0.73
+(4778, 512)
+(1555, 512)
+12-Nov-20 10:51:46 - Generated 10000 features.
+12-Nov-20 10:52:55 - TRAIN SGD 10fCV F1-score: 0.92 (+/- 0.03)
+12-Nov-20 10:52:55 - DEV SGD dataset prediction: 0.73
+12-Nov-20 10:53:10 - TRAIN LR 10fCV F1-score: 0.93 (+/- 0.02)
+12-Nov-20 10:53:10 - DEV LR dataset prediction: 0.72
+(4778, 768)
+(1555, 768)
+12-Nov-20 10:53:26 - Generated 10000 features.
+12-Nov-20 10:55:10 - TRAIN SGD 10fCV F1-score: 0.93 (+/- 0.03)
+12-Nov-20 10:55:10 - DEV SGD dataset prediction: 0.72
+12-Nov-20 10:55:32 - TRAIN LR 10fCV F1-score: 0.93 (+/- 0.03)
+12-Nov-20 10:55:32 - DEV LR dataset prediction: 0.72
+(4778, 256)
+(1555, 256)
+12-Nov-20 10:55:38 - Generated 20000 features.
+12-Nov-20 10:56:14 - TRAIN SGD 10fCV F1-score: 0.92 (+/- 0.04)
+12-Nov-20 10:56:14 - DEV SGD dataset prediction: 0.67
+12-Nov-20 10:56:19 - TRAIN LR 10fCV F1-score: 0.92 (+/- 0.03)
+12-Nov-20 10:56:19 - DEV LR dataset prediction: 0.65
+(4778, 512)
+(1555, 512)
+12-Nov-20 10:56:32 - Generated 20000 features.
+12-Nov-20 10:57:42 - TRAIN SGD 10fCV F1-score: 0.92 (+/- 0.02)
+12-Nov-20 10:57:42 - DEV SGD dataset prediction: 0.69
+12-Nov-20 10:57:53 - TRAIN LR 10fCV F1-score: 0.93 (+/- 0.03)
+12-Nov-20 10:57:53 - DEV LR dataset prediction: 0.68
+(4778, 768)
+(1555, 768)
+12-Nov-20 10:58:13 - Generated 20000 features.
+12-Nov-20 10:59:57 - TRAIN SGD 10fCV F1-score: 0.93 (+/- 0.02)
+12-Nov-20 10:59:57 - DEV SGD dataset prediction: 0.66
+12-Nov-20 11:00:14 - TRAIN LR 10fCV F1-score: 0.93 (+/- 0.02)
+12-Nov-20 11:00:14 - DEV LR dataset prediction: 0.67
+(4778, 256)
+(1555, 256)
+12-Nov-20 11:00:22 - Generated 30000 features.
+
+12-Nov-20 11:00:59 - TRAIN SGD 10fCV F1-score: 0.92 (+/- 0.04)
+12-Nov-20 11:00:59 - DEV SGD dataset prediction: 0.69
+12-Nov-20 11:01:05 - TRAIN LR 10fCV F1-score: 0.92 (+/- 0.02)
+12-Nov-20 11:01:05 - DEV LR dataset prediction: 0.69
+(4778, 512)
+(1555, 512)
+12-Nov-20 11:01:21 - Generated 30000 features.
+12-Nov-20 11:02:33 - TRAIN SGD 10fCV F1-score: 0.93 (+/- 0.03)
+12-Nov-20 11:02:33 - DEV SGD dataset prediction: 0.67
+12-Nov-20 11:02:44 - TRAIN LR 10fCV F1-score: 0.93 (+/- 0.03)
+12-Nov-20 11:02:44 - DEV LR dataset prediction: 0.68
+(4778, 768)
+(1555, 768)
+12-Nov-20 11:03:09 - Generated 30000 features.
+12-Nov-20 11:04:54 - TRAIN SGD 10fCV F1-score: 0.93 (+/- 0.03)
+12-Nov-20 11:04:54 - DEV SGD dataset prediction: 0.70
+12-Nov-20 11:05:10 - TRAIN LR 10fCV F1-score: 0.93 (+/- 0.02)
+12-Nov-20 11:05:10 - DEV LR dataset prediction: 0.69
+QApplication: invalid style override passed, ignoring it.
+    Available styles: Windows, Fusion
+Number of features        2500
+variable                   SVM
+value                 0.774954
+Name: 12, dtype: object
+12-Nov-20 11:05:11 - Final feature number: 2500, final learner: SVM
+True
+0.9273793414524132
