@@ -73,6 +73,8 @@ def tokenize_dataset(text):
     tokenizer = DistilBertTokenizer.from_pretrained('distilbert-base-uncased')
     token_ids = []
     for sentence in text['tweet']:
+        if(len(sentence) > 512):
+            sentence = sentence[:512]
         tokens = tokenizer.encode(sentence, add_special_tokens=True)
         token_ids.append(tokens)
 
@@ -103,7 +105,7 @@ def tokenize_dataset(text):
     return token_ids, attention_masks
 
 
-def train(tokenized_sentences, mask, labels, validation_tokenized_sentences, validation_masks, validation_labels):
+def train(tokenized_sentences, mask, labels, validation_tokenized_sentences, validation_masks_parameter, validation_labels_parameter):
     """
     Trains BERT classifier
     """
@@ -127,9 +129,9 @@ def train(tokenized_sentences, mask, labels, validation_tokenized_sentences, val
     train_inputs = torch.tensor(tokenized_sentences)
     validation_inputs = torch.tensor(validation_tokenized_sentences)
     train_labels = torch.tensor(labels)
-    validation_labels = torch.tensor(validation_labels)
+    validation_labels = torch.tensor(validation_labels_parameter)
     train_masks = torch.tensor(mask)
-    validation_masks = torch.tensor(validation_masks)
+    validation_masks = torch.tensor(validation_masks_parameter)
 
 
     # The DataLoader needs to know our batch size for training, so we specify it
