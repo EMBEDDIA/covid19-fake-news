@@ -25,6 +25,7 @@ import csv
 import config 
 from feature_construction import *
 from sklearn.model_selection import GridSearchCV
+from skopt import BayesSearchCV
 import matplotlib.pyplot as plt
 import seaborn as sns
 from sklearn.decomposition import TruncatedSVD
@@ -83,9 +84,10 @@ def train(train_data, dev_data, output=False):
                 logging.info("Generated {} features.".format(nfeat*len(feature_names)))
                 parameters = {"loss":["hinge","log"],"penalty":["elasticnet"],"alpha":[0.01,0.001,0.0001,0.0005],"l1_ratio":[0.05,0.25,0.3,0.6,0.8,0.95],"power_t":[0.5,0.1,0.9]}
                 svc = SGDClassifier()
-                gs1 = GridSearchCV(svc, parameters, verbose = 0, n_jobs = 8,cv = 10, refit = True)
-                gs1.fit(data_matrix, final_y)
-                clf1 = gs1.best_estimator_
+                #gs1 = GridSearchCV(svc, parameters, verbose = 0, n_jobs = 8,cv = 10, refit = True)
+                bs1 = BayesSearchCV(estimator=svc, search_spaces=parameters, n_jobs=-8, cv=10)
+                bs1.fit(data_matrix, final_y)
+                clf1 = bs1.best_estimator_
                 
                 scores = cross_val_score(clf1, data_matrix, final_y, cv=10, scoring='f1_macro')
                 acc_svm = scores.mean()
@@ -98,9 +100,10 @@ def train(train_data, dev_data, output=False):
                 #"Train LSA"
                 parameters = {"C":[0.1,1,10,25,50,100,500],"penalty":["l2"]}
                 svc = LogisticRegression(max_iter = 100000,  solver="lbfgs")
-                gs2 = GridSearchCV(svc, parameters, verbose = 0, n_jobs = 8,cv = 10, refit = True)
-                gs2.fit(data_matrix, final_y)
-                clf2 = gs2.best_estimator_
+                #gs2 = GridSearchCV(svc, parameters, verbose = 0, n_jobs = 8,cv = 10, refit = True)
+                bs2 = BayesSearchCV(estimator=svc, search_spaces=parameters, n_jobs=-8, cv=10)
+                bs2.fit(data_matrix, final_y)
+                clf2 = bs2.best_estimator_
 
                 scores = cross_val_score(clf2, data_matrix, final_y, cv=10, scoring='f1_macro')
                 logging.info("TRAIN LR 10fCV F1-score: %0.2f (+/- %0.2f)" % (scores.mean(), scores.std() * 2))
