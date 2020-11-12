@@ -64,8 +64,8 @@ def train(train_data, dev_data, output=False):
     trained_models = {}
     
     for nrep in range(1):
-        for nfeat in [2500]:#5000,10000,15000]:
-            for dim in [256]:# ,512,768]:
+        for nfeat in [2500, 5000, 10000, 15000]:
+            for dim in [256, 512, 768]:
                 
                 #"Prepare train"
                 
@@ -103,7 +103,7 @@ def train(train_data, dev_data, output=False):
                 clf2 = gs2.best_estimator_
 
                 scores = cross_val_score(clf2, data_matrix, final_y, cv=10, scoring='f1_macro')
-                logging.info("TRALR 10fCV F1-score: %0.2f (+/- %0.2f)" % (scores.mean(), scores.std() * 2))
+                logging.info("TRAIN LR 10fCV F1-score: %0.2f (+/- %0.2f)" % (scores.mean(), scores.std() * 2))
                 predictions2 = clf2.predict(dev_matrix)
                 acc_lr = f1_score(predictions2, dev_y)
                 logging.info("DEV LR dataset prediction: %0.2f" % acc_lr)

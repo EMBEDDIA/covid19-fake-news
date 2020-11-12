@@ -29,3 +29,10 @@
 | sentence_bert | [xlm-roberta-base](./src/sentence_bert/sentence_transformers/README.md) | 0.959 |  0.906 |
 | linear_SVM | [Tax2Vec-+-tf-idf](./src/tax2vec/README.md) |     | 0.949 |  
 | distilBERT | [distilBERT-tokenizer](./src/distilBERT/README.md) | 0.978 |  |  
+
+
+## Results Train Dev Test split.
+
+| Model name   |      Vectorization      |  Train score | Test score |  Validation Score |
+|----------|:-------------:|:------:|:------:|:------:|
+| TFIDF_LSA |  [LSA](./src/lsa_baseline/README.md) | 0.92 (avg 10-fold CV) | 0.77 | 0.93 |
