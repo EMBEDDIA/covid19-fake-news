@@ -81,7 +81,7 @@ def train(train_data = parse_data.get_train(), dev_data = parse_data.get_dev()):
     parameters = {"C":[0.1,1,10,25,50,100,500],"penalty":["l1","l2"]}
     lr_learner = LogisticRegression(max_iter = 100000,  solver="saga")
     #gs = GridSearchCV(lr_learner, parameters, verbose = 10, n_jobs = 8,cv = 10, refit = True)
-    bs = BayesSearchCV(estimator=svc, search_spaces=parameters, n_jobs=-8, cv=10)
+    bs = BayesSearchCV(estimator=lr_learner, search_spaces=parameters, n_jobs=-8, cv=10)
     bs.fit(train_matrix, train_y)
     clf = bs.best_estimator_
     scores = cross_val_score(clf, train_matrix, train_y, cv=10, scoring='f1_macro')
