@@ -375,6 +375,57 @@ def convert_labels_to_ids(labels):
     return id_list
 
 
+def import_model(lang='en',path_in="."):
+    clf = pickle.load(open(os.path.join(config.PICKLES_PATH, "clf_" + lang + ".pkl"), 'rb'))
+    return clf
+
+def evaluate(clf, X, y, masks):
+    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+
+    X = torch.tensor(X)
+    y = torch.tensor(y)
+    masks = torch.tensor(masks)
+
+
+    validation_data = TensorDataset(X, masks, y)
+    validation_sampler = SequentialSampler(validation_data)
+    validation_dataloader = DataLoader(validation_data, sampler=validation_sampler, batch_size=8)
+
+    clf.eval()
+    # Tracking variables
+    eval_loss, eval_accuracy = 0, 0
+    nb_eval_steps, nb_eval_examples = 0, 0
+    # Evaluate data for one epoch
+    preds = []
+    orgs = []
+
+    for batch in validation_dataloader:
+        b_input_ids = batch[0].to(device)
+        b_input_mask = batch[1].to(device)
+        b_labels = batch[2].to(device)
+
+        # Telling the model not to compute or store gradients, saving memory and
+        # speeding up validation
+        with torch.no_grad():
+            outputs = clf(b_input_ids,
+                            token_type_ids=None,
+                            attention_mask=b_input_mask)
+
+        # Get the "logits" output by the model. The "logits" are the output
+        # values prior to applying an activation function like the softmax.
+        logits = outputs[0]
+        # Move logits and labels to CPU
+        logits = logits.detach().cpu().numpy()
+        guessed = np.argmax(logits, axis=1)
+        print(guessed)
+        label_ids = b_labels.to('cpu').numpy()
+        preds = preds + guessed.tolist()
+        orgs = orgs + label_ids.tolist()
+        # Track the number of batches
+        nb_eval_steps += 1
+    print(f1_score(preds, orgs))
+    print(label_ids)
+
 
 if __name__ == "__main__":
     train_set, valid_set = load_dataset()
@@ -382,5 +433,6 @@ if __name__ == "__main__":
     validation_tokenized_sentences, validation_masks = tokenize_dataset(valid_set)
     labels = convert_labels_to_ids(train_set['label'])
     validation_labels = convert_labels_to_ids(valid_set['label'])
-    train(tokenized_sentences, attention_mask, labels, validation_tokenized_sentences, validation_masks, validation_labels)
-
+    #train(tokenized_sentences, attention_mask, labels, validation_tokenized_sentences, validation_masks, validation_labels)
+    clf = import_model()
+    evaluate(clf, validation_tokenized_sentences, validation_labels, validation_masks)
