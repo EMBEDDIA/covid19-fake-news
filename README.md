@@ -36,3 +36,4 @@
 | Model name   |      Vectorization      |  Train score | Test score |  Validation Score |
 |----------|:-------------:|:------:|:------:|:------:|
 | TFIDF_LSA |  [LSA](./src/lsa_baseline/README.md) | 0.92 (avg 10-fold CV) | 0.77 | 0.93 |
+| distilBERT | [distilBERT-tokenizer](./src/distilBERT/README.md) | 0.98 | 0.97 | 0.98 | 
