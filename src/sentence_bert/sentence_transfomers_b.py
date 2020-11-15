@@ -32,9 +32,8 @@ from sklearn.metrics import f1_score
 from sklearn.model_selection import cross_val_score
 from sklearn.linear_model import LogisticRegression, SGDClassifier
 from sklearn.model_selection import GridSearchCV
-from sklearn.metrics import f1_score
 from skopt import BayesSearchCV
-from model import train_NN
+from model import train_NN, predict
 
 #BERT
 class BERTTransformer():
@@ -79,7 +78,7 @@ def fit_space(texts, model = "distilbert-base-nli-mean-tokens"):
     x = bert.to_matrix()
     return x
 
-"""
+
 def train(train_data = parse_data.get_train(), dev_data = parse_data.get_dev()):
     #Prepare the train data
     train_texts = train_data["text_a"].to_list()
@@ -114,12 +113,12 @@ def train(train_data = parse_data.get_train(), dev_data = parse_data.get_dev()):
     return fitted
 
 
-def fit(model=train(), test_data=parse_data.get_test()):
+def fit(model, test_data=parse_data.get_test()):
     X = test_data["text_a"].to_list()
     orig = test_data['label'].to_list()
     preds = model.predict(X)
     print(f1_score(orig,preds))
-"""
+
 import pandas as pd
 from model_helper import ColumnarDataset
 
@@ -132,24 +131,13 @@ def prepare_dataset(data):
     print(train_matrix)
     train_dataset = ColumnarDataset(train_matrix, train_y)
     return train_dataset      
-
     
-def train_nets(train_data=parse_data.get_train(), dev_data = parse_data.get_dev()):
-    """
-    train_texts = train_data["text_a"].to_list()
-    train_y = train_data['label'].to_list()
-    train_matrix = fit_space(train_texts) 
-    del train_texts
-    
-     #Train the dev data
-    dev_texts = dev_data["text_a"].to_list()
-    dev_y = dev_data['label'].to_list()
-    dev_matrix = fit_space(dev_texts) 
-    del dev_texts    
-    """
+def train_nets(train_data=parse_data.get_train(), dev_data = parse_data.get_dev(), test_data = parse_data.get_test()):
     train_dataset = prepare_dataset(train_data)
     valid_dataset = prepare_dataset(dev_data)
+    test_dataset = prepare_dataset(test_data)
+    net = train_NN(train_dataset, valid_dataset)
     
-    m = train_NN(train_dataset, valid_dataset)
-    
+    predict(test_dataset, net)
+
 train_nets()

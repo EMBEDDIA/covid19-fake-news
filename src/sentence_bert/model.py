@@ -14,7 +14,7 @@ from sklearn.metrics import f1_score, accuracy_score, precision_score, recall_sc
 import torch.optim as optim
 from tqdm import tqdm
 
-from model_helper import  ShallowNet, TwoNet
+import model_helper 
 
 def prepare_loaders(train_dataset, val_dataset, batch_size=20):
     torch.manual_seed(1903)
@@ -23,7 +23,7 @@ def prepare_loaders(train_dataset, val_dataset, batch_size=20):
     return train_loader, test_loader 
 
 
-def evaluate_env(net, test_loader, device=torch.device("cuda")):
+def evaluate_env(net, test_loader, device=torch.device("cuda"), mode = "VALID"):
     orgs = []
     preds = []
     net.eval()
@@ -38,11 +38,15 @@ def evaluate_env(net, test_loader, device=torch.device("cuda")):
             orgs = orgs + labels.tolist()
             preds = preds + guessed.tolist()
     print()
-    print(f'Validaiton accuracy: {accuracy_score(orgs, preds)}')
-    print(f'Validaiton F1-score: {f1_score(orgs, preds)}')
-    print(f'Validaiton precision: {precision_score(orgs, preds)}')
-    print(f'Validaiton recall: {recall_score(orgs, preds)}')
+    print(f'{mode} accuracy: {accuracy_score(orgs, preds)}')
+    print(f'{mode} F1-score: {f1_score(orgs, preds)}')
+    print(f'{mode} precision: {precision_score(orgs, preds)}')
+    print(f'{mode} recall: {recall_score(orgs, preds)}')
     return orgs, preds
+    
+def predict(test_dataset, net, batch_size=32):
+    test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=True)
+    evaluate_env(net, test_loader, mode="TEST")
     
     
 def train_NN(train_dataset, val_dataset , max_epochs = 1000, batch_size = 300):
@@ -51,7 +55,7 @@ def train_NN(train_dataset, val_dataset , max_epochs = 1000, batch_size = 300):
 
     train_loader, val_loader = prepare_loaders(train_dataset, val_dataset, batch_size)
 
-    net = ShallowNet(768)
+    net = model_helper.ShallowNet(768)
     net = net.to(device)
     criterion = nn.CrossEntropyLoss()
     optimizer = optim.SGD(net.parameters(), lr=0.001, momentum=0.9)                                          
