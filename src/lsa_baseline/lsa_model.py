@@ -36,13 +36,18 @@ try:
 except:
     pass
 
-def fit(X, model_path="."):
+def fit_space(X, model_path="."):
     df_final = build_dataframe(X)
-    tokenizer,clf,reducer = _import(lang="",path_in=model_path)
+    tokenizer,_,reducer = _import(lang="",path_in=model_path)
     matrix_form = tokenizer.transform(df_final)
     reduced_matrix_form = reducer.transform(matrix_form)
+    return reduced_matrix_form 
+
+def fit(X, model_path="."):
+    reduced_matrix_form = fit_space(X, model_path)    
+    _,clf,_ = _import(lang="",path_in=model_path)
     predictions = clf.predict(reduced_matrix_form)    
-    return predictions
+    return reduced_matrix_form, predictions
 
 def evaluate(test_data=parse_data.get_test()):
     X = test_data["text_a"].to_list()
