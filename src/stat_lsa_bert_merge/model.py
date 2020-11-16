@@ -20,7 +20,7 @@ import matplotlib.pyplot as plt
 import model_helper 
 
 def prepare_loaders(train_dataset, val_dataset, batch_size=20):
-    torch.manual_seed(1903)
+    #torch.manual_seed(1903)
     train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
     test_loader = DataLoader(val_dataset, batch_size=batch_size, shuffle=True)
     return train_loader, test_loader 
@@ -54,22 +54,27 @@ def predict(test_dataset, net, batch_size=32):
     evaluate_env(net, test_loader, mode="TEST")
     
     
-def train_NN(train_dataset, val_dataset, max_epochs = 1000, batch_size = 300):
+def train_NN(train_dataset, val_dataset, max_epochs = 100, batch_size = 300, lr = 0.005, dropout = 0.5):
+    plt.clf()
+    plt.figure()
+ 
+    
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 
     train_loader, val_loader = prepare_loaders(train_dataset, val_dataset, batch_size)
 
-    net = model_helper.ShallowNet(1552)
+    net = model_helper.FiveNet(1552, p = dropout)
+    print(net)
     net = net.to(device)
     criterion = nn.CrossEntropyLoss()
-    optimizer = optim.SGD(net.parameters(), lr=0.001, momentum=0.9)                                          
+    optimizer = optim.SGD(net.parameters(), lr=lr)                                          
     
     results = []
     scores = {}
     scores_plt = { "epochs" : list(range(max_epochs)), "validation" : [], "train" : [] }
     for epoch in tqdm(range(max_epochs), total = max_epochs):  
-        running_loss = 0.0
+        #running_loss = 0.0
         
         for i, data in enumerate(train_loader, 0):
 
@@ -82,10 +87,10 @@ def train_NN(train_dataset, val_dataset, max_epochs = 1000, batch_size = 300):
             loss.backward()
             optimizer.step()
     
-            running_loss += loss.item()
-            if epoch % (max_epochs/2) == 0:
-                print('[%d, %5d] loss: %.3f' % (epoch + 1, i + 1, running_loss / 10))
-                running_loss = 0.0                        
+            #running_loss += loss.item()
+            #if epoch % (max_epochs/2) == 0:
+            #    print('[%d, %5d] loss: %.3f' % (epoch + 1, i + 1, running_loss / 10))
+            #    running_loss = 0.0                        
          
 
         o, p = evaluate_env(net, train_loader, device, mode="TRAIN")
@@ -100,10 +105,16 @@ def train_NN(train_dataset, val_dataset, max_epochs = 1000, batch_size = 300):
         scores[score] = net
         results.append(score)
     
-    
+    #plt.title('5Net SGD lr:'+str(lr)+" drop:"+str(p))
     df = pd.DataFrame(scores_plt)
-    plot = sns.lineplot(x='epochs', y='value', hue='variable', data=pd.melt(df, ['epochs']))
-    plt.legend(bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0.)
-    plt.show()
-    plot.figure.savefig("learning_analysis.png",dpi=300)
+    #plot = sns.lineplot(x='epochs', y='value', hue='variable', data=pd.melt(df, ['epochs']))
+    #plt.show()
+    #plt.ylabel('f1_score')
+    name = "sgd_lr_"+str(lr)+"_prop_"+str(dropout)+".pkl"
+    import pickle
+    with open("log_data/"+name, 'wb') as f:
+        pickle.dump(df, f)
+        
+    #plot.figure.savefig(,dpi=300)
+
     return scores[max(list(scores.keys()))]
