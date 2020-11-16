@@ -24,7 +24,7 @@ for file in os.listdir("log_data"):
     plt.title('5Net SGD lr:'+str(lr)+" drop:"+str(p))
     plt.ylabel('f1_score')
     plot = sns.lineplot(x='epochs', y='value', hue='variable', data=pd.melt(df, ['epochs']))
-    plot.figure.savefig("_".join(["imgs/"] + parsed[1:-1] + [".png"]), dpi=300)
+    plot.figure.savefig("_".join(["imgs/"] + parsed[1:-1] +  [str(p), ".png"]), dpi=300)
     #plt.show()
     plt.clf()
     
