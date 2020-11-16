@@ -43,11 +43,10 @@ def train_nets(train_data=parse_data.get_train(), dev_data = parse_data.get_dev(
     train_dataset = prepare_dataset(train_data)
     valid_dataset = prepare_dataset(dev_data)
     test_dataset = prepare_dataset(test_data)
-    dataframe = {}
     for lr in [0.0001, 0.005, 0.001, 0.005, 0.01, 0.05, 0.1]:
         for p in [0.1, 0.3, 0.5, 0.7]:
             print(lr, p)
-            net = train_NN(train_dataset, valid_dataset, max_epochs=3, batch_size = 32, lr = lr, dropout = p)
+            net = train_NN(train_dataset, valid_dataset, max_epochs=100, batch_size = 32, lr = lr, dropout = p)
             predict(test_dataset, net)
             torch.save(net.state_dict(), os.path.join("pickles","net_"+str(lr)+"_"+str(p)+".pymodel"))
 
