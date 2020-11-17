@@ -123,18 +123,28 @@ def evaluate(clf, X, test_y):
 
 
 if __name__ == "__main__":
-    data_validation = parse_data.get_test()
+    data_test = parse_data.get_test()
+    data_validation = parse_data.get_dev()
     data_train = parse_data.get_train()
 
-    features_train, features_test = get_features(data_train, data_validation)
+    # _, features_validation = get_features(data_train, data_validation)
+    # features_train, features_test = get_features(data_train, data_test)
 
-    pd.DataFrame(features_train.toarray()).to_csv("train_features.csv")
-    pd.DataFrame(features_test.toarray()).to_csv("test_features.csv")
+    # pd.DataFrame(features_train.toarray()).to_csv("train_features.csv")
+    # pd.DataFrame(features_validation.toarray()).to_csv("validation_features.csv")
+    # pd.DataFrame(features_test.toarray()).to_csv("test_features.csv")
 
+    features_train = []
+    features_test = []
 
-    model = fit(features_train, data_train['label'].to_list())
+    s = pd.read_csv('train_features.csv', sep=',')
+    features_train = pd.DataFrame(s.to_numpy())
+
+    s = pd.read_csv('validation_features.csv', sep=',')
+    features_validation = pd.DataFrame(s.to_numpy())
+
+    s = pd.read_csv('test_features.csv', sep=',')
+    features_test = pd.DataFrame(s.to_numpy())
+
+    model = fit(features_train, data_train['label'].to_list(), features_validation, data_validation['label'].to_list())
     evaluate(model, features_test, data_validation['label'].to_list())
-
-    ## save model with pickle
-    with open(os.path.join("clf_en.pkl"), mode='wb') as f:
-        pickle.dump(model, f)

@@ -61,9 +61,10 @@ def load_dataset():
     print("Loading dataset...")
     train_set = parse_data.get_train()
     valid_set = parse_data.get_dev()
+    test_set = parse_data.get_test()
     print("Dataset loaded")
 
-    return train_set, valid_set
+    return train_set, valid_set, test_set
 
 def tokenize_dataset(text):
     """
@@ -356,9 +357,6 @@ def train(tokenized_sentences, mask, labels, validation_tokenized_sentences, val
         pickle.dump(model, f)
 
 
-
-
-
 def convert_labels_to_ids(labels):
     """
     Converts labels to integer IDs
@@ -428,11 +426,13 @@ def evaluate(clf, X, y, masks):
 
 
 if __name__ == "__main__":
-    train_set, valid_set = load_dataset()
+    train_set, valid_set, test_set = load_dataset()
     tokenized_sentences, attention_mask = tokenize_dataset(train_set)
     validation_tokenized_sentences, validation_masks = tokenize_dataset(valid_set)
+    test_tokenized_sentences, test_masks = tokenize_dataset(test_set)
     labels = convert_labels_to_ids(train_set['label'])
     validation_labels = convert_labels_to_ids(valid_set['label'])
+    test_labels = convert_labels_to_ids(test_set['label'])
     #train(tokenized_sentences, attention_mask, labels, validation_tokenized_sentences, validation_masks, validation_labels)
     clf = import_model()
-    evaluate(clf, validation_tokenized_sentences, validation_labels, validation_masks)
+    evaluate(clf, test_tokenized_sentences, test_labels, test_masks)
