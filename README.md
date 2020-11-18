@@ -38,4 +38,3 @@
 | TFIDF_LSA |  [LSA](./src/lsa_baseline/README.md) | 0.92 (avg 10-fold CV) | 0.77 | 0.93 |
 | distilBERT | [distilBERT-tokenizer](./src/distilBERT/README.md) |  | 0.97 | 0.98 | 
 | linear_SVM | [Tax2Vec-+-tf-idf](./src/tax2vec/README.md) |    | 0.92 | 0.94 |
-| linear_SVM | [Tax2Vec(knowledge graph)-+-tf-idf](./src/tax2vec_knowledge_graphs/README.md) |    | 0.91 | 0.94 |
