@@ -41,7 +41,7 @@ import random
 from sklearn.metrics import f1_score
 from numba import jit, cuda, vectorize
 from transformers import get_linear_schedule_with_warmup
-
+import pandas as pd
 
 def format_time(elapsed):
     '''
@@ -433,6 +433,15 @@ if __name__ == "__main__":
     labels = convert_labels_to_ids(train_set['label'])
     validation_labels = convert_labels_to_ids(valid_set['label'])
     test_labels = convert_labels_to_ids(test_set['label'])
+
+    #pd.DataFrame(tokenized_sentences).to_csv("train_features.csv")
+    #pd.DataFrame(attention_mask).to_csv("train_masks.csv")
+
+    #pd.DataFrame(validation_tokenized_sentences).to_csv("validation_features.csv")
+    #pd.DataFrame(validation_masks).to_csv("validation_masks.csv")
+
+    #pd.DataFrame(test_tokenized_sentences).to_csv("test_features.csv")
+    #pd.DataFrame(test_masks).to_csv("test_masks.csv")
     #train(tokenized_sentences, attention_mask, labels, validation_tokenized_sentences, validation_masks, validation_labels)
     clf = import_model()
     evaluate(clf, test_tokenized_sentences, test_labels, test_masks)
