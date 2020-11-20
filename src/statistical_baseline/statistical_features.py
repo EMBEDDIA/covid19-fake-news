@@ -74,3 +74,12 @@ def build_features(texts):
     feature_mat = np.concatenate((df_data['w_based'], df_data['c_based']), axis=1)
     centered =  preprocessing.scale(feature_mat)
     return centered
+
+
+def fit_space(texts):
+    df_data = {} 
+    df_data['w_based'] = np.array(list(map(count_word_based, texts)))
+    df_data['c_based'] = np.array(list(map(count_char_based, texts)))
+    feature_mat = np.concatenate((df_data['w_based'], df_data['c_based']), axis=1)
+    centered =  preprocessing.scale(feature_mat)
+    return centered
