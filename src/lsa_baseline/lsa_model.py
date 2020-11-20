@@ -47,7 +47,7 @@ def fit(X, model_path="."):
     reduced_matrix_form = fit_space(X, model_path)    
     _,clf,_ = _import(lang="",path_in=model_path)
     predictions = clf.predict(reduced_matrix_form)    
-    return reduced_matrix_form, predictions
+    return predictions
 
 def evaluate(test_data=parse_data.get_test()):
     X = test_data["text_a"].to_list()
@@ -183,6 +183,13 @@ def _fit(path=""):
     x = [1 if c  == 'real' else 0 for c in data['label'].to_list()]
     print(f1_score(predictions, x))
             
+def evaluate_TDT():
+    print("TRAIN OUTS: ")
+    evaluate(parse_data.get_train())
+    print("DEV OUTS: ")
+    evaluate(parse_data.get_dev())
+    print("TEST OUTS: ")
+    evaluate(parse_data.get_test())
+    
 if __name__ == "__main__":
-    export()
-    evaluate()
+    evaluate_TDT()
