@@ -25,7 +25,6 @@ from sklearn.model_selection import cross_val_score
 from sklearn.linear_model import LogisticRegression, SGDClassifier
 from sklearn.model_selection import GridSearchCV
 from sklearn.metrics import f1_score
-from skopt import BayesSearchCV
 
 
 #BERT
@@ -71,44 +70,59 @@ def prepare_text(texts, model = "distilbert-base-nli-mean-tokens"):
     x = bert.to_matrix()
     return x
 
-def train(train_data = parse_data.get_train(), dev_data = parse_data.get_dev()):
+def train(train_data = parse_data.get_train(), dev_data = parse_data.get_dev(), model = "distilbert-base-nli-mean-tokens" ):
     #Prepare the train data
     train_texts = train_data["text_a"].to_list()
     train_y = train_data['label'].to_list()
-    train_matrix = prepare_text(train_texts) 
+    train_matrix = prepare_text(train_texts, model) 
     del train_texts       
        
     parameters = {"C":[0.1,1,10,25,50,100,500],"penalty":["l1","l2"]}
     lr_learner = LogisticRegression(max_iter = 100000,  solver="saga")
-    #gs = GridSearchCV(lr_learner, parameters, verbose = 10, n_jobs = 8,cv = 10, refit = True)
-    bs = BayesSearchCV(estimator=lr_learner, search_spaces=parameters, n_jobs=-8, cv=10)
-    bs.fit(train_matrix, train_y)
-    clf = bs.best_estimator_
+    gs = GridSearchCV(lr_learner, parameters, verbose = 10, n_jobs = 8,cv = 10, refit = True)
+    gs.fit(train_matrix, train_y)
+    clf = gs.best_estimator_
     scores = cross_val_score(clf, train_matrix, train_y, cv=10, scoring='f1_macro')
-    logging.info("TRAIN SGD 10fCV F1-score: %0.2f (+/- %0.2f)" % (scores.mean(), scores.std() * 2))
-    
+    logging.info("TRAIN SGD 10fCV F1-score: %0.4f (+/- %0.4f)" % (scores.mean(), scores.std() * 2))
+    clf = clf.fit(train_matrix, train_y)
+    # Prepare output
+    #fitted = clf.fit(train_matrix, train_y)
+    with open(os.path.join(config.PICKLES_PATH, model + "_clf.pkl"), "wb") as f:
+        pickle.dump(clf, f)
+    return
+    predictions = clf.predict(train_matrix)
+    acc_svm = f1_score(train_y, predictions)
+    logging.info("TRAIN SGD dataset prediction: %0.4f" % acc_svm)
     #Train the dev data
     dev_texts = dev_data["text_a"].to_list()
-    dev_y = dev_data['label'].to_list()
+    c = dev_data['label'].to_list()
     dev_matrix = prepare_text(dev_texts) 
     del dev_texts
     
     #Evaluate the dev data
     predictions = clf.predict(dev_matrix)
-    acc_svm = f1_score(predictions, dev_y)
-    logging.info("DEV SGD dataset prediction: %0.2f" % acc_svm)
+    acc_svm = f1_score(dev_y, predictions)
+    logging.info("DEV SGD dataset prediction: %0.4f" % acc_svm)
 
-    # Prepare output
-    fitted = clf.fit(train_matrix, train_y)
-    with open(os.path.join(config.PICKLES_PATH, "clf.pkl"), "wb") as f:
-        pickle.dump(fitted, f)
-    return fitted
+ 
+    return clf
 
-
-def fit(model=train(), test_data=parse_data.get_test()):
-    X = test_data["text_a"].to_list()
+def evaluate(test_data=parse_data.get_test(), mname = "distilbert-base-nli-mean-tokens" ):
+    with open(os.path.join(config.PICKLES_PATH, mname + "_clf.pkl"), "rb") as f:
+        model = pickle.load(f)
+    fit(model, test_data)
+    
+def fit(model, test_data=parse_data.get_test()):
+    X = prepare_text(test_data["text_a"].to_list())
     orig = test_data['label'].to_list()
     preds = model.predict(X)
     print(f1_score(orig,preds))
 
-fit()
+#()
+train(model="roberta-large-nli-stsb-mean-tokens")
+print("TRAIN: ")
+evaluate(parse_data.get_train(), model="roberta-large-nli-stsb-mean-tokens")
+print("DEV: ")
+evaluate(parse_data.get_dev(), model="roberta-large-nli-stsb-mean-tokens"))
+print("TEST: ")
+evaluate(parse_data.get_test(), model="roberta-large-nli-stsb-mean-tokens"))
