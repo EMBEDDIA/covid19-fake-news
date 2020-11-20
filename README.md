@@ -40,13 +40,9 @@
 | linear_SVM | [Tax2Vec-+-tf-idf](./src/tax2vec/README.md) |    | 0.92 | 0.94 |
 | linear_SVM | [Tax2Vec(knowledge graph)-+-tf-idf](./src/tax2vec_knowledge_graphs/README.md) |    | 0.93 | 0.93 |
 
-
-
-
-
 ## Results Train Dev Test split (EVALUATION BK)
 
 | Model name   |      Vectorization      |   Train tactic | Train score | DEV score |  Test Score |
-|----------|:-------------:|:------:|:------:|:------:|
+|----------|:-------------:|:------:|:------:|:------:|:------:|
 | TFIDF_LSA |  [LSA](./src/lsa_baseline/README.md) | (avg 10-fold CV) |  0.9658 | 0.9302 | 0.9281 |
 | Stloymetric features | [handcrafted-features](./src/statistical_baseline/README.md) | (avg 10-fold CV) | 0.7861 | 0.7903 | 0.7805 |
