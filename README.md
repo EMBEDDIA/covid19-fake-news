@@ -47,5 +47,6 @@
 | TFIDF_LSA |  [LSA](./src/lsa_baseline/README.md) | (avg 10-fold CV) |  0.9658 | 0.9302 | 0.9281 |
 | Stloymetric features | [handcrafted-features](./src/statistical_baseline/README.md) | (avg 10-fold CV) | 0.7861 | 0.7903 | 0.7805 |
 | sentence_bert | [distilbert-base-nli-mean-tokens](./src/sentence_bert/sentence_transformers/README.md) |   (avg 10-fold CV) | 0.9365 | 0.9124 | 0.9113 |
-| sentence_bert | [roberta-large-nli-stsb-mean-tokens](./src/sentence_bert/sentence_transformers/README.md) |   (avg 10-fold CV) | 0.9623 | 0.9226 | 0.9142 |
+| sentence_bert | [roberta-large-nli-stsb-mean-tokens](./src/sentence_bert/sentence_transformers/README.md) |   (avg 10-fold CV) | 0.9623 | 0.9184 | 0.9142 |
+| sentence_bert | [xlm-r-large-en-ko-nli-ststb](./src/sentence_bert/sentence_transformers/README.md) |   (avg 10-fold CV) |0.9376 | 0.9226 | 0.9124 |
 | distilBERT | [distilBERT-tokenizer](./src/distilBERT/README.md) |  x  | 0.9933 | 0.9807 | 0.9708
