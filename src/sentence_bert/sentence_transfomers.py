@@ -95,7 +95,7 @@ def train(train_data = parse_data.get_train(), dev_data = parse_data.get_dev(), 
     logging.info("TRAIN SGD dataset prediction: %0.4f" % acc_svm)
     #Train the dev data
     dev_texts = dev_data["text_a"].to_list()
-    c = dev_data['label'].to_list()
+    dev_y = dev_data['label'].to_list()
     dev_matrix = prepare_text(dev_texts) 
     del dev_texts
     
@@ -110,19 +110,19 @@ def train(train_data = parse_data.get_train(), dev_data = parse_data.get_dev(), 
 def evaluate(test_data=parse_data.get_test(), mname = "distilbert-base-nli-mean-tokens" ):
     with open(os.path.join(config.PICKLES_PATH, mname + "_clf.pkl"), "rb") as f:
         model = pickle.load(f)
-    fit(model, test_data)
+    fit(model, test_data, mname)
     
-def fit(model, test_data=parse_data.get_test()):
-    X = prepare_text(test_data["text_a"].to_list())
+def fit(model, test_data=parse_data.get_test(), mname = "distilbert-base-nli-mean-tokens"):
+    X = prepare_text(test_data["text_a"].to_list(), mname)
     orig = test_data['label'].to_list()
     preds = model.predict(X)
     print(f1_score(orig,preds))
 
 #()
-train(model="roberta-large-nli-stsb-mean-tokens")
+#train(model="roberta-large-nli-stsb-mean-tokens")
 print("TRAIN: ")
-evaluate(parse_data.get_train(), model="roberta-large-nli-stsb-mean-tokens")
+evaluate(parse_data.get_train(), mname="roberta-large-nli-stsb-mean-tokens")
 print("DEV: ")
-evaluate(parse_data.get_dev(), model="roberta-large-nli-stsb-mean-tokens"))
+evaluate(parse_data.get_dev(), mname="roberta-large-nli-stsb-mean-tokens")
 print("TEST: ")
-evaluate(parse_data.get_test(), model="roberta-large-nli-stsb-mean-tokens"))
+evaluate(parse_data.get_test(), mname="roberta-large-nli-stsb-mean-tokens")
