@@ -83,7 +83,7 @@ def train_nets(train_data=parse_data.get_train(), dev_data = parse_data.get_dev(
             print(lr, p)
             net = train_NN(train_dataset, valid_dataset, dims ,max_epochs=100, batch_size = 32, lr = lr, dropout = p)
             predict(test_dataset, net)
-            torch.save(net.state_dict(), os.path.join("pickles","t2v_bert_lsa_"+str(lr)+"_"+str(p)+".pymodel"))
+            torch.save(net.state_dict(), os.path.join("pickles","simp_2_"+str(lr)+"_"+str(p)+".pymodel"))
 
             
 train_nets()

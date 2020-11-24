@@ -41,20 +41,25 @@ def evaluate_env(net, test_loader, device=torch.device("cuda"), mode = "VALID"):
             orgs = orgs + labels.tolist()
             preds = preds + guessed.tolist()
     print()
+    outs = { "mode" : mode,
+            "accuracy" : accuracy_score(orgs, preds),
+            "F1-score" : f1_score(orgs, preds),
+            "precision" : precision_score(orgs, preds),
+            "recall": recall_score(orgs, preds)}
     
     if not mode == "SILENT":
         print(f'{mode} accuracy: {accuracy_score(orgs, preds)}')
         print(f'{mode} F1-score: {f1_score(orgs, preds)}')
         print(f'{mode} precision: {precision_score(orgs, preds)}')
         print(f'{mode} recall: {recall_score(orgs, preds)}')
-        return orgs, preds
+        return orgs, preds, outs
     return f1_score(orgs, preds)    
 def predict(test_dataset, net, batch_size=32):
     test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=True)
-    evaluate_env(net, test_loader, mode="TEST")
-    
-    
-def train_NN(train_dataset, val_dataset, dims = 1552, max_epochs = 100, batch_size = 300, lr = 0.005, dropout = 0.5):
+    o, p, _ = evaluate_env(net, test_loader, mode="TEST")
+    score = f1_score(o, p)
+    return score
+def train_NN(train_dataset, val_dataset, test_dataset="f", dims = 1552, max_epochs = 100, batch_size = 300, lr = 0.005, dropout = 0.5):
     plt.clf()
     plt.figure()
  
@@ -63,16 +68,17 @@ def train_NN(train_dataset, val_dataset, dims = 1552, max_epochs = 100, batch_si
 
 
     train_loader, val_loader = prepare_loaders(train_dataset, val_dataset, batch_size)
-
-    net = model_helper.FiveNet(dims , p = dropout)
+    _, test_loader = prepare_loaders(train_dataset, test_dataset, batch_size)
+    net = model_helper.ThreeNet(dims , p = dropout)
     print(net)
     net = net.to(device)
     criterion = nn.CrossEntropyLoss()
     optimizer = optim.SGD(net.parameters(), lr=lr)                                          
     
     results = []
+    dics = []
     scores = {}
-    scores_plt = { "epochs" : list(range(max_epochs)), "validation" : [], "train" : [] }
+    scores_plt = { "epochs" : list(range(max_epochs)), "validation" : [], "train" : [] , "test":  []}
     for epoch in tqdm(range(max_epochs), total = max_epochs):  
         #running_loss = 0.0
         
@@ -93,26 +99,33 @@ def train_NN(train_dataset, val_dataset, dims = 1552, max_epochs = 100, batch_si
             #    running_loss = 0.0                        
          
 
-        o, p = evaluate_env(net, train_loader, device, mode="TRAIN")
+        o, p, dic = evaluate_env(net, train_loader, device, mode="TRAIN")
         score = f1_score(o, p)
-        scores_plt["train"].append(score)
+        scores_plt["train"].append(score)        
+        dics.append(dic)
         
-        
-        o, p = evaluate_env(net, val_loader, device, mode="VALID")
+        o, p, dic = evaluate_env(net, val_loader, device, mode="VALID")
         score = f1_score(o, p)
         scores_plt["validation"].append(score)
+        dics.append(dic)
+        
+        o, p, dic = evaluate_env(net, test_loader, device, mode="TEST")
+        score = f1_score(o, p)
+        scores_plt["test"].append(score)
+        dics.append(dic)
 
         scores[score] = net
         results.append(score)
     
     #plt.title('5Net SGD lr:'+str(lr)+" drop:"+str(p))
-    df = pd.DataFrame(scores_plt)
+    df = pd.DataFrame(dics)
     #plot = sns.lineplot(x='epochs', y='value', hue='variable', data=pd.melt(df, ['epochs']))
     #plt.show()
     #plt.ylabel('f1_score')
-    name = "t2v_bert_lsa_"+str(lr)+"_prop_"+str(dropout)+".pkl"
+    name = "3net"+str(lr)+"_prop_"+str(dropout)
+    df.to_csv("log_data/dfs/"+name+".csv",index=False)
     import pickle
-    with open("log_data/"+name, 'wb') as f:
+    with open("log_data/"+name+".pkl", 'wb') as f:
         pickle.dump(df, f)
         
     #plot.figure.savefig(,dpi=300)

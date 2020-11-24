@@ -26,7 +26,7 @@ class ColumnarDataset(Dataset):
        return np.array(row), self.y[idx] 
    
 class ShallowNet(nn.Module):    
-  def __init__(self, n_features):
+  def __init__(self, n_features, p = 1.00):
     super(ShallowNet, self).__init__()
     self.a1 = nn.Linear(n_features, 2)
    
