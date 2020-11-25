@@ -51,3 +51,5 @@
 | sentence_bert | [roberta-large-nli-stsb-mean-tokens](./src/sentence_bert/sentence_transformers/README.md) |   (avg 10-fold CV) | 0.9623 | 0.9184 | 0.9142 |
 | sentence_bert | [xlm-r-large-en-ko-nli-ststb](./src/sentence_bert/sentence_transformers/README.md) |   (avg 10-fold CV) |0.9376 | 0.9226 | 0.9124 |
 | distilBERT | [distilBERT-tokenizer](./src/distilBERT/README.md) |  x  | 0.9933 | 0.9807 | 0.9708
+| stacking_probs | [lsa_sentence_bert_stlyometrics](./src/sentence_bert/stacking) |  NN | 0.9710 | 0.9380 | 0.9390 |
+| stacking | [lsa_sentence_bert_stlyometrics](./src/sentence_bert/stacking) | (10-fold CV) | 0.9695 | 0.9445 | 0.9425 |
