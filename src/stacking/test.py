@@ -16,6 +16,17 @@ from sklearn import preprocessing
 import sentence_transfomers
 import statistical_baseline
 import torch 
+from sklearn import preprocessing
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.ensemble import RandomForestClassifier
+from sklearn import svm
+from sklearn.datasets import make_classification
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import f1_score
+from sklearn.model_selection import cross_val_score
+from sklearn.linear_model import LogisticRegression, SGDClassifier
+from sklearn.metrics import accuracy_score
+from sklearn.model_selection import GridSearchCV
 
 text = "ncludes high-quality download in MP3, FLAC and more. Paying supporters also get unlimited streaming via the free Bandcamp app."
 
@@ -60,7 +71,7 @@ def train_nets(train_data=parse_data.get_train(), dev_data = parse_data.get_dev(
     for lr in [0.0001, 0.005, 0.001, 0.005, 0.01, 0.05, 0.1]:
         for p in [0.1, 0.3, 0.5, 0.7]:
             print(lr, p)
-            net = train_NN(train_dataset, valid_dataset, test_dataset, dims ,max_epochs=100, batch_size = 64, lr = lr, dropout = p)
+            net = train_NN(train_dataset, valid_dataset, test_dataset, dims ,max_epochs=20, batch_size = 64, lr = lr, dropout = p)
             score = predict(test_dataset, net)
             if score > best:
                 best = score
@@ -69,6 +80,46 @@ def train_nets(train_data=parse_data.get_train(), dev_data = parse_data.get_dev(
                 best_p = p
     torch.save(outs.state_dict(), os.path.join("pickles","3net"+str(best_lr)+"_"+str(best_p)+".pymodel"))
 
-            
-train_nets()
+def train_SGD():
+    train = parse_data.get_train()
+    train_texts = train["text_a"].to_list()
+    train_features = get_features(train_texts)
+    train_y = train["label"].to_list()
+    del train_texts
+    del train
+    print("TRAINING: ")
+    parameters = {"loss":["hinge","log"],"penalty":["elasticnet"],"alpha":[0.01,0.001,0.0001,0.0005],"l1_ratio":[0.05,0.25,0.3,0.6,0.8,0.95],"power_t":[0.5,0.1,0.9]}
+    x = SGDClassifier()
+    clf1 = GridSearchCV(x, parameters, n_jobs = 8,cv = 10, refit = True, verbose = 10)
+    scores = cross_val_score(clf1, train_features, train_y, n_jobs = 8, cv=10, scoring='f1_macro', verbose = 10)
+    clf1 = clf1.fit(train_features, train_y)
+    import pickle
+    with open("clf_all.pkl","wb") as f:
+        pickle.dump(clf1, f)
+        
+    score_train = f1_score(train_y, clf1.predict(train_features))
+    
+    dev = parse_data.get_dev()
+    dev_texts = dev["text_a"].to_list()
+    dev_features = get_features(dev_texts)
+    dev_y = dev["label"].to_list()
+    del dev_texts
+    del dev
+
+    dev_score = f1_score(dev_y, clf1.predict(dev_features))
+
+    test = parse_data.get_test()
+    test_texts = test["text_a"].to_list()
+    test_features = get_features(test_texts)
+    test_y = test["label"].to_list()
+    del test_texts
+    del test
+
+    test_score = f1_score(test_y, clf1.predict(test_features))
+
+    print("TRAIN: %0.4f DEV: %0.4f TEST: %0.4f" % (score_train, dev_score, test_score))
+
+
+train_SGD()       
+#train_nets()
 

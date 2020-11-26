@@ -92,42 +92,34 @@ def train_NN(train_dataset, val_dataset, test_dataset="f", dims = 1552, max_epoc
             loss = criterion(outputs, labels)
             loss.backward()
             optimizer.step()
-    
-            #running_loss += loss.item()
-            #if epoch % (max_epochs/2) == 0:
-            #    print('[%d, %5d] loss: %.3f' % (epoch + 1, i + 1, running_loss / 10))
-            #    running_loss = 0.0                        
-         
 
         o, p, dic = evaluate_env(net, train_loader, device, mode="TRAIN")
         score = f1_score(o, p)
         scores_plt["train"].append(score)        
-        dics.append(dic)
         
         o, p, dic = evaluate_env(net, val_loader, device, mode="VALID")
         score = f1_score(o, p)
         scores_plt["validation"].append(score)
-        dics.append(dic)
         
-        o, p, dic = evaluate_env(net, test_loader, device, mode="TEST")
-        score = f1_score(o, p)
-        scores_plt["test"].append(score)
-        dics.append(dic)
-
         scores[score] = net
         results.append(score)
     
-    #plt.title('5Net SGD lr:'+str(lr)+" drop:"+str(p))
+    best = scores[max(list(scores.keys()))]
+    
+    o, p, dic = evaluate_env(best, train_loader, device, mode="TRAIN")
+    dics.append(dic)
+    
+    o, p, dic = evaluate_env(best, val_loader, device, mode="VALID")
+    dics.append(dic)
+    
+    o, p, dic = evaluate_env(best, test_loader, device, mode="TEST")
+    dics.append(dic)
+    
     df = pd.DataFrame(dics)
-    #plot = sns.lineplot(x='epochs', y='value', hue='variable', data=pd.melt(df, ['epochs']))
-    #plt.show()
-    #plt.ylabel('f1_score')
     name = "3net"+str(lr)+"_prop_"+str(dropout)
-    df.to_csv("log_data/dfs/"+name+".csv",index=False)
+    df.to_csv("log_data/3net/"+name+".csv",index=False)
     import pickle
-    with open("log_data/"+name+".pkl", 'wb') as f:
+    with open("log_data/3net/"+name+".pkl", 'wb') as f:
         pickle.dump(df, f)
         
-    #plot.figure.savefig(,dpi=300)
-
-    return scores[max(list(scores.keys()))]
+    return best
