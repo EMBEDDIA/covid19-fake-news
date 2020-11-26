@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="BranchesTreeState">
+    <expand>
+      <path>
+        <item name="ROOT" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="LOCAL_ROOT" type="e8cecc67:BranchNodeDescriptor" />
+      </path>
+      <path>
+        <item name="ROOT" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="REMOTE_ROOT" type="e8cecc67:BranchNodeDescriptor" />
+      </path>
+      <path>
+        <item name="ROOT" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="REMOTE_ROOT" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="GROUP_NODE:origin" type="e8cecc67:BranchNodeDescriptor" />
+      </path>
+    </expand>
+    <select />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="0d8db22f-6e5d-4fc5-862b-86819233c5dc" name="Default Changelist" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/covid19-fake-news.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/covid19-fake-news.iml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/data/train.csv" beforeDir="false" afterPath="$PROJECT_DIR$/data/train.csv" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/lsa_baseline/config.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/lsa_baseline/evaluation_1211.log" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/lsa_baseline/feature_construction.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/lsa_baseline/imgs/lsa_based_learning.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/lsa_baseline/parse_data.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/lsa_baseline/pickles/clf_.pkl" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/lsa_baseline/pickles/clf_en.pkl" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/lsa_baseline/pickles/reducer_.pkl" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/lsa_baseline/pickles/reducer_en.pkl" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/lsa_baseline/pickles/tokenizer_.pkl" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/lsa_baseline/pickles/tokenizer_en.pkl" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/lsa_baseline/sentence_embeddings.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/lsa_baseline/tfidif-merged-cv-expanded.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/stacking/lsa_model.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/stacking/lsa_model.py" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="ProjectId" id="1kdj7NyHfvbHmC20RjyLpAYfoE4" />
+  <component name="ProjectLevelVcsManager" settingsEditedManually="true">
+    <ConfirmationsSetting value="2" id="Add" />
+  </component>
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent">
+    <property name="ASKED_ADD_EXTERNAL_FILES" value="true" />
+    <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
+    <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
+    <property name="SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
+  </component>
+  <component name="SvnConfiguration">
+    <configuration />
+  </component>
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="0d8db22f-6e5d-4fc5-862b-86819233c5dc" name="Default Changelist" comment="" />
+      <created>1606037195037</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1606037195037</updated>
+    </task>
+    <servers />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
+    <option name="oldMeFiltersMigrated" value="true" />
+  </component>
+  <component name="VcsManagerConfiguration">
+    <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
+  </component>
+</project>

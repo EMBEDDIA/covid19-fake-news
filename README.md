@@ -39,7 +39,7 @@
 | distilBERT | [distilBERT-tokenizer](./src/distilBERT/README.md) |  | 0.97 | 0.98 | 
 | linear_SVM | [Tax2Vec-+-tf-idf](./src/tax2vec/README.md) |    | 0.92 | 0.94 |
 | linear_SVM | [Tax2Vec(knowledge graph)-+-tf-idf](./src/tax2vec_knowledge_graphs/README.md) |    | 0.93 | 0.93 |
-| gradient_boosting | [Tax2Vec(knowledge graph)-+-tf-idf-+-distilBERT_tokenization] |    | 0.92 | 0.94 |
+| gradient_boosting | [Tax2Vec(knowledge graph)-+-tf-idf-+-distilBERT_tokenization](.) |    | 0.92 | 0.94 |
 
 ## Results Train Dev Test split (EVALUATION BK)
 
