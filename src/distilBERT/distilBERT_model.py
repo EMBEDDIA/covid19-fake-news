@@ -384,7 +384,7 @@ def fit(X, model_path="."):
     clf = import_model()
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
-    X = torch.tensor(X)
+    X = torch.tensor(matrix)
     masks = torch.tensor(masks)
 
     validation_data = TensorDataset(X, masks)
@@ -400,9 +400,11 @@ def fit(X, model_path="."):
     orgs = []
 
     for batch in validation_dataloader:
-        b_input_ids = batch[0].to(device)
+        b_input_ids = batch[0]
+        b_input_ids = b_input_ids.type(torch.LongTensor)
+        b_input_ids = b_input_ids.to(device)
         b_input_mask = batch[1].to(device)
-
+            
         # Telling the model not to compute or store gradients, saving memory and
         # speeding up validation
         with torch.no_grad():
