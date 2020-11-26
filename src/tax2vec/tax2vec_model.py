@@ -28,6 +28,50 @@ from scipy.sparse import coo_matrix, hstack
 from skopt import BayesSearchCV
 from sklearn.ensemble import RandomForestClassifier,GradientBoostingClassifier
 
+
+def load(path="pickles"):
+    with open(os.path.join(path, "tax2vec.pkl"), "rb") as f:
+        tax2vec = pickle.load(f)
+    tokenizer = pickle.load(open(os.path.join(config.PICKLES_PATH, "tokenizer" + ".pkl"), 'rb'))
+    return tax2vec, tokenizer
+
+
+def save(tax2vec, tokenizer, path="pickles"):
+    with open(os.path.join(path, "tax2vec.pkl"), "wb") as f:
+        pickle.dump(tax2vec, f)
+    with open(os.path.join(path, "tokenizer.pkl"), "wb") as f:
+        pickle.dump(tokenizer, f)
+
+def _import():
+    model = pickle.load(open(os.path.join(config.PICKLES_PATH, "clf_" + "en" + ".pkl"), 'rb'))
+    return model
+
+def fit_space(X, model_path="."):
+    t2v_instance, tokenizer = load()
+    features_matrix = []
+    semantic_features = t2v_instance.transform(X)
+    features_matrix.append(semantic_features)
+    tfidf_words = tokenizer.transform(build_dataframe(X))
+    features_matrix.append(tfidf_words)
+    features = hstack(features_matrix)
+    return features
+
+def fit_probs(texts, model_path="."):
+    features = fit_space(texts, model_path)
+    model = _import()
+    try:
+        predictions = model.decision_function(features)
+    except:
+        predictions = model.predict_proba(features)
+    return predictions
+
+def fit(X, model_path="."):
+    reduced_matrix_form = fit_space(X, model_path)
+    clf = _import()
+    predictions = clf.predict(reduced_matrix_form)
+    return predictions
+
+
 def get_features(data_train, data_validation, data_test):
     ## generate learning examples
     num_splits = 1
@@ -41,7 +85,6 @@ def get_features(data_train, data_validation, data_test):
             heuristic="closeness_centrality",
             class_names=list(set(data_train['label'].to_list())))
         semantic_features_train = tax2vec_instance.fit_transform(data_train['text_a'])
-        print(semantic_features_train)
 
         ## get test features
         train_matrices_for_svm = []
@@ -54,8 +97,7 @@ def get_features(data_train, data_validation, data_test):
         validation_matrices_for_svm.append(semantic_features_validation)
         test_matrices_for_svm.append(semantic_features_test)
 
-        tfidf_word_train, tokenizer_2, _ = data_docs_to_matrix(
-            data_train['text_a'], mode="matrix_pan")
+        tfidf_word_train, tokenizer_2, _ = data_docs_to_matrix(data_train['text_a'], mode="matrix_pan")
         tfidf_word_validation = tokenizer_2.transform(build_dataframe(data_validation['text_a']))
         tfidf_word_test = tokenizer_2.transform(build_dataframe(data_test['text_a']))
         train_matrices_for_svm.append(tfidf_word_train)
@@ -67,48 +109,45 @@ def get_features(data_train, data_validation, data_test):
         features_validation = hstack(validation_matrices_for_svm)
         features_test = hstack(test_matrices_for_svm)
 
+        save(tax2vec_instance, tokenizer_2)
+
     return features_train,features_validation, features_test
     
-def train(train_data = parse_data.get_train(), dev_data = parse_data.get_dev()):
-    train_texts = train_data["text_a"].to_list()
-    train_y = train_data['label'].to_list()
-    
-    dev_texts = dev_data["text_a"].to_list()
-    dev_y = dev_data['label'].to_list()
-    
-    tax2vec_dict = dict()
-    for _ in range(1):
-        #for num_features in [10,25,50,75,100]:
-        for num_features in [ 25 ]:
-            tax2vec_instance = tax2vec.tax2vec(
-                max_features=num_features,
-                targets=train_y,
-                num_cpu="all",
-                heuristic="closeness_centrality",
-                class_names=list(set(train_y))
-                )            
-            
-            tax2vec_instance.fit(train_texts)
-            _, tokenizer, _ = data_docs_to_matrix(train_texts, mode="matrix_pan")
+def train(X, y_train, X_validation, Y_validation):
+    new_train_y = []
 
-            features_train = get_features(train_texts, tokenizer, tax2vec_instance)
-            features_dev = get_features(dev_texts, tokenizer, tax2vec_instance)
-            
-            print(features_train)
-            with open("features_train","wb") as f:
-                pickle.dump(features_train,f)
+    for y in y_train:
+        if isinstance(y, list):
+            new_train_y.append(list(y).index(1))
+        else:
+            new_train_y.append(y)
 
-            with open("features_dev","wb") as f:
-                pickle.dump(features_dev,f)
-            return
-            model = learn(features_train, train_y)
-            score = evaluate(model,features_dev, dev_y)
-            tax2vec_dict[score] = (tax2vec_instance, tokenizer, model)
-        
-    best_ = max(list(tax2vec_dict.keys()))
-    tax2vec_instance, tokenizer, model = tax2vec_dict[best_]
-    
-    return tax2vec_instance, tokenizer, model
+    classifiers = [GradientBoostingClassifier(), RandomForestClassifier(n_estimators=10), svm.SVC(probability=True), SGDClassifier()]
+    best_classifier = classifiers[0]
+    best_score = 0
+    for classifier in range(len(classifiers)):
+        #parameters = {}
+        #if classifier == 0:
+        #    parameters = {"loss":["deviance", "exponential"],"learning_rate":[0.1, 0.2, 0.3, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8],"n_estimators":[10, 20, 50, 100, 200]}
+        #elif classifier == 1:
+        #    parameters = {"n_estimators":[10, 20, 50, 100, 200]}
+        #elif classifier == 2:
+        #    parameters = {"C": [0.1, 1, 10, 25, 50, 100, 500], "kernel": ["linear", "poly", "rbf", "sigmoid"]}
+        #elif classifier == 3:
+        #    parameters = {"loss": ["hinge", "log", "huber"], "penalty": ["l2", "l1", "elasticnet"]}
+
+        #clf = BayesSearchCV(estimator=classifiers[classifier], search_spaces=parameters, n_jobs=-8, cv=10)
+        #clf.fit(X, new_train_y)
+
+        clf = classifiers[classifier]
+        clf.fit(X, new_train_y)
+
+        clf_score = evaluate(clf, X_validation, Y_validation)
+        if clf_score > best_score:
+            best_score = clf_score
+            best_classifier = clf
+
+    return best_classifier
     
 def export():
     tax2vec_instance, tokenizer, model = train(parse_data.get_train(), parse_data.get_dev())
@@ -132,28 +171,7 @@ def learn(train_matrix, train_y):
     print("TRAIN SGD 10fCV F1-score: %0.2f (+/- %0.2f)" % (scores.mean(), scores.std() * 2))
     return clf.fit(train_matrix, train_y)
 
-    
-def fit(X, y_train, X_validation, Y_validation):
-    new_train_y = []
 
-    for y in y_train:
-        if isinstance(y, list):
-            new_train_y.append(list(y).index(1))
-        else:
-            new_train_y.append(y)
-
-    classifiers = [GradientBoostingClassifier(), RandomForestClassifier(n_estimators=10), svm.SVC(probability=True), SGDClassifier()]  ## spyct.Model()
-    best_classifier = classifiers[0]
-    best_score = 0
-    for classifier in classifiers:
-        clf = classifier
-        clf.fit(X, new_train_y)
-
-        clf_score = evaluate(clf, X_validation, Y_validation)
-        if clf_score > best_score:
-            best_score = clf_score
-            best_classifier = clf
-    return best_classifier
 
 def evaluate(clf, X, test_y):
     new_test_y = []
@@ -180,29 +198,23 @@ if __name__ == "__main__":
     #pd.DataFrame(features_test.toarray()).to_csv("test_features.csv")
 
 
-    s = pd.read_csv('features/train_features.csv', sep=',')
-    features_train = pd.DataFrame(s.to_numpy())
+    #s = pd.read_csv('features/train_features.csv', sep=',')
+    #features_train = pd.DataFrame(s.to_numpy())
 
-    s = pd.read_csv('features/validation_features.csv', sep=',')
-    features_validation = pd.DataFrame(s.to_numpy())
+    #s = pd.read_csv('features/validation_features.csv', sep=',')
+    #features_validation = pd.DataFrame(s.to_numpy())
 
-    s = pd.read_csv('features/test_features.csv', sep=',')
-    features_test = pd.DataFrame(s.to_numpy())
+    #s = pd.read_csv('features/test_features.csv', sep=',')
+    #features_test = pd.DataFrame(s.to_numpy())
 
-    model = pickle.load(open(os.path.join(config.PICKLES_PATH, "clf_" + "en" + ".pkl"), 'rb'))
+    #model = _import()
 
-    print(features_train.shape)
-    print(len(data_train['label']))
-    print(features_validation.shape)
-    print(len(data_validation['label']))
-    print(features_test.shape)
-    print(len(data_test['label']))
-
-
-    #model = fit(features_train, data_train['label'].to_list(), features_validation, data_validation['label'].to_list())
-    print("Evaluating test set:")
-    evaluate(model, features_test, data_test['label'].to_list())
+    #model = train(features_train, data_train['label'].to_list(), features_validation, data_validation['label'].to_list())
+    #print("Evaluating test set:")
+    #evaluate(model, features_test, data_test['label'].to_list())
 
     ## save model with pickle
     #with open(os.path.join("clf_en.pkl"), mode='wb') as f:
-     #   pickle.dump(model, f)
+    #    pickle.dump(model, f)
+
+    print(fit(data_test['text_a']))
