@@ -53,3 +53,6 @@
 | distilBERT | [distilBERT-tokenizer](./src/distilBERT/README.md) |  x  | 0.9933 | 0.9807 | 0.9708
 | stacking_probs | [lsa_sentence_bert_stlyometrics](./src/sentence_bert/stacking) |  NN | 0.9710 | 0.9380 | 0.9390 |
 | stacking | [lsa_sentence_bert_stlyometrics](./src/sentence_bert/stacking) | (10-fold CV) | 0.9695 | 0.9445 | 0.9425 |
+| linear_SVM | [Tax2Vec-+-tf-idf](./src/tax2vec/README.md) |  |  | 0.92 | 0.94 |
+| linear_SVM | [Tax2Vec(knowledge graph)-+-tf-idf](./src/tax2vec_knowledge_graphs/README.md) |  |  | 0.93 | 0.93 |
+| gradient_boosting | [Tax2Vec(knowledge graph)-+-tf-idf-+-distilBERT_tokenization](.) |  |  | 0.92 | 0.94 |
