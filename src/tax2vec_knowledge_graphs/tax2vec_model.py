@@ -146,14 +146,19 @@ def train(X, y_train, X_validation, Y_validation):
         #clf.fit(X, new_train_y)
 
         clf = classifiers[classifier]
-        clf.fit(X, new_train_y)
-
-        clf_score = evaluate(clf, X_validation, Y_validation)
+        #clf.fit(X, new_train_y)
+        clf_score = cross_val_score(clf, X, new_train_y, scoring="f1", cv = 10).mean()
+        print("Scored: " + str(clf_score))
         if clf_score > best_score:
             best_score = clf_score
             best_classifier = clf
 
-    return best_classifier
+    print("Train score:")
+    print(best_score)
+    return_classifier = best_classifier.fit(X, new_train_y)
+    print("On validation set:")
+    print(evaluate(return_classifier, X_validation, Y_validation))
+    return return_classifier
 
 def evaluate(clf, X, test_y):
     new_test_y = []
@@ -184,28 +189,22 @@ if __name__ == "__main__":
     #features_test = []
 
 
-    #s = pd.read_csv('features/train_features_kg.csv', sep=',')
-    #features_train = pd.DataFrame(s.to_numpy())
+    s = pd.read_csv('features/train_features_kg.csv', sep=',')
+    features_train = pd.DataFrame(s.to_numpy())
 
-    #s = pd.read_csv('features/validation_features_kg.csv', sep=',')
-    #features_validation = pd.DataFrame(s.to_numpy())
+    s = pd.read_csv('features/validation_features_kg.csv', sep=',')
+    features_validation = pd.DataFrame(s.to_numpy())
 
-    #s = pd.read_csv('features/test_features_kg.csv', sep=',')
-    #features_test = pd.DataFrame(s.to_numpy())
+    s = pd.read_csv('features/test_features_kg.csv', sep=',')
+    features_test = pd.DataFrame(s.to_numpy())
 
 
 
-    #model = train(features_train, data_train['label'].to_list(), features_validation, data_validation['label'].to_list())
-    #print("Evaluating on test set...")
-    #evaluate(model, features_test, data_test['label'].to_list())
+    model = train(features_train, data_train['label'].to_list(), features_validation, data_validation['label'].to_list())
+    print("Evaluating on test set...")
+    evaluate(model, features_test, data_test['label'].to_list())
 
     ## save model with pickle
-    #with open(os.path.join("clf_en.pkl"), mode='wb') as f:
-    #    pickle.dump(model, f)
+    with open(os.path.join("clf_en.pkl"), mode='wb') as f:
+        pickle.dump(model, f)
 
-    train_text = [
-        "Brexit (/ˈbrɛksɪt, ˈbrɛɡzɪt/;[1] a portmanteau of British and exit) is the withdrawal of the United Kingdom (UK) from the European Union (EU). Following a referendum held on 23 June 2016 in which 51.9 per cent of those voting supported leaving the EU, the Government invoked Article 50 of the Treaty on European Union, starting a two-year process which was due to conclude with the UK's exit on 29 March 2019 – a deadline which has since been extended to 31 October 2019.[2]",
-        "Withdrawal from the EU has been advocated by both left-wing and right-wing Eurosceptics, while pro-Europeanists, who also span the political spectrum, have advocated continued membership and maintaining the customs union and single market. The UK joined the European Communities (EC) in 1973 under the Conservative government of Edward Heath, with continued membership endorsed by a referendum in 1975. In the 1970s and 1980s, withdrawal from the EC was advocated mainly by the political left, with the Labour Party's 1983 election manifesto advocating full withdrawal. From the 1990s, opposition to further European integration came mainly from the right, and divisions within the Conservative Party led to rebellion over the Maastricht Treaty in 1992. The growth of the UK Independence Party (UKIP) in the early 2010s and the influence of the cross-party People's Pledge campaign have been described as influential in bringing about a referendum. The Conservative Prime Minister, David Cameron, pledged during the campaign for the 2015 general election to hold a new referendum—a promise which he fulfilled in 2016 following pressure from the Eurosceptic wing of his party. Cameron, who had campaigned to remain, resigned after the result and was succeeded by Theresa May, his former Home Secretary. She called a snap general election less than a year later but lost her overall majority. Her minority government is supported in key votes by the Democratic Unionist Party.",
-        "The broad consensus among economists is that Brexit will likely reduce the UK's real per capita income in the medium term and long term, and that the Brexit referendum itself damaged the economy.[a] Studies on effects since the referendum show a reduction in GDP, trade and investment, as well as household losses from increased inflation. Brexit is likely to reduce immigration from European Economic Area (EEA) countries to the UK, and poses challenges for UK higher education and academic research. As of May 2019, the size of the divorce bill—the UK's inheritance of existing EU trade agreements—and relations with Ireland and other EU member states remains uncertain. The precise impact on the UK depends on whether the process will be a hard or soft Brexit."]
-
-    print(fit(train_text))

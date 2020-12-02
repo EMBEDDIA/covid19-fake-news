@@ -140,14 +140,19 @@ def train(X, y_train, X_validation, Y_validation):
         #clf.fit(X, new_train_y)
 
         clf = classifiers[classifier]
-        clf.fit(X, new_train_y)
-
-        clf_score = evaluate(clf, X_validation, Y_validation)
+        #clf.fit(X, new_train_y)
+        clf_score = cross_val_score(clf, X, new_train_y, scoring="f1", cv = 10).mean()
+        print("Scored: " + str(clf_score))
         if clf_score > best_score:
             best_score = clf_score
             best_classifier = clf
 
-    return best_classifier
+    print("Train score:")
+    print(best_score)
+    return_classifier = best_classifier.fit(X, new_train_y)
+    print("On validation set:")
+    print(evaluate(return_classifier, X_validation, Y_validation))
+    return return_classifier
     
 def export():
     tax2vec_instance, tokenizer, model = train(parse_data.get_train(), parse_data.get_dev())
@@ -198,23 +203,23 @@ if __name__ == "__main__":
     #pd.DataFrame(features_test.toarray()).to_csv("test_features.csv")
 
 
-    #s = pd.read_csv('features/train_features.csv', sep=',')
-    #features_train = pd.DataFrame(s.to_numpy())
+    s = pd.read_csv('features/train_features.csv', sep=',')
+    features_train = pd.DataFrame(s.to_numpy())
 
-    #s = pd.read_csv('features/validation_features.csv', sep=',')
-    #features_validation = pd.DataFrame(s.to_numpy())
+    s = pd.read_csv('features/validation_features.csv', sep=',')
+    features_validation = pd.DataFrame(s.to_numpy())
 
-    #s = pd.read_csv('features/test_features.csv', sep=',')
-    #features_test = pd.DataFrame(s.to_numpy())
+    s = pd.read_csv('features/test_features.csv', sep=',')
+    features_test = pd.DataFrame(s.to_numpy())
 
     #model = _import()
 
-    #model = train(features_train, data_train['label'].to_list(), features_validation, data_validation['label'].to_list())
-    #print("Evaluating test set:")
-    #evaluate(model, features_test, data_test['label'].to_list())
+    model = train(features_train, data_train['label'].to_list(), features_validation, data_validation['label'].to_list())
+    print("Evaluating test set:")
+    evaluate(model, features_test, data_test['label'].to_list())
 
     ## save model with pickle
-    #with open(os.path.join("clf_en.pkl"), mode='wb') as f:
-    #    pickle.dump(model, f)
+    with open(os.path.join("clf_en.pkl"), mode='wb') as f:
+        pickle.dump(model, f)
 
-    print(fit(data_test['text_a']))
+    #print(fit(data_test['text_a']))
