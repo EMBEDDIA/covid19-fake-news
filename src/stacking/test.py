@@ -16,6 +16,9 @@ from sklearn import preprocessing
 import sentence_transfomers
 import statistical_baseline
 import torch 
+import distilBERT_model as db
+import tax2vec_model as t2v_vanila
+import tax2vec_model_kg as t2v_kg
 from sklearn import preprocessing
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.ensemble import RandomForestClassifier
@@ -33,21 +36,27 @@ text = "ncludes high-quality download in MP3, FLAC and more. Paying supporters a
 
 def get_features(texts):
     lsa_features = lsa_model.fit(texts).reshape((len(texts), 1))
+    #dbert_features = db.fit(texts)
+    vanila = t2v_vanila.fit_probs(texts)
+    #kg =  t2v_kg.fit_probs(texts)
     bert_features = sentence_transfomers.fit(texts, "distilbert-base-nli-mean-tokens").reshape((len(texts), 1))
     stat_features = statistical_baseline.fit(texts).reshape((len(texts), 1)).reshape((len(texts), 1))
     roberta_features = sentence_transfomers.fit(texts, "roberta-large-nli-stsb-mean-tokens").reshape((len(texts), 1))
     xlm_features = sentence_transfomers.fit(texts, "xlm-r-large-en-ko-nli-ststb").reshape((len(texts), 1))    
-    features = np.hstack(([lsa_features, bert_features, stat_features, roberta_features, xlm_features, roberta_features]))
+    features = np.hstack(([lsa_features, vanila, bert_features, stat_features, roberta_features, xlm_features, roberta_features]))
     print(features.shape)
     return preprocessing.scale(features)
     
 def get_features_probs(texts):
     lsa_features = lsa_model.fit_probs(texts).reshape((len(texts), 1))
+    #dbert_features = db.fit(texts)
+    vanila = t2v_vanila.fit_probs(texts)
+    #kg =  t2v_kg.fit_probs(texts)
     bert_features = sentence_transfomers.fit_probs(texts, "distilbert-base-nli-mean-tokens").reshape((len(texts), 1))
     stat_features = statistical_baseline.fit_probs(texts).reshape((len(texts), 1))
     roberta_features = sentence_transfomers.fit_probs(texts, "roberta-large-nli-stsb-mean-tokens").reshape((len(texts), 1))
     xlm_features = sentence_transfomers.fit_probs(texts, "xlm-r-large-en-ko-nli-ststb").reshape((len(texts), 1))    
-    features = np.hstack(([lsa_features, bert_features, stat_features, roberta_features, xlm_features, roberta_features]))
+    features = np.hstack(([lsa_features, vanila, bert_features, stat_features, roberta_features, xlm_features, roberta_features]))
     print(features.shape)
     return preprocessing.scale(features)
 
@@ -94,7 +103,7 @@ def train_SGD():
     scores = cross_val_score(clf1, train_features, train_y, n_jobs = 8, cv=10, scoring='f1_macro', verbose = 10)
     clf1 = clf1.fit(train_features, train_y)
     import pickle
-    with open("clf_all.pkl","wb") as f:
+    with open("clf_all_2.pkl","wb") as f:
         pickle.dump(clf1, f)
         
     score_train = f1_score(train_y, clf1.predict(train_features))
@@ -118,8 +127,19 @@ def train_SGD():
     test_score = f1_score(test_y, clf1.predict(test_features))
 
     print("TRAIN: %0.4f DEV: %0.4f TEST: %0.4f" % (score_train, dev_score, test_score))
-
-
-train_SGD()       
+import pickle
+def predict_valid():
+    vals = parse_data.readValidation()
+    feats = get_features(vals["tweet"])
+    with open("clf_all.pkl","rb") as f:
+        clf = pickle.load(f)
+    predictions = clf.predict(feats)
+    ou = ["fake" if p == 0 else "real" for p in predictions ]
+    outs = {"id": list(range(1,len(ou)+1)), "label" : ou}
+    df = pd.DataFrame(outs)
+    df.to_csv("answer.txt", index=False)
+        
+#predict_valid()    
+train_SGD()
 #train_nets()
 

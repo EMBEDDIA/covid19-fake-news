@@ -18,6 +18,36 @@
     - fit(X,y) -> function for fitting the trained model with new data
     - evaluate(X,y) -> function for elvauation of the model data
 
+## Results Train Dev Test split (EVALUATION BK)
+
+| Model name   |      Vectorization      |   Train tactic | Train score | DEV score |  Test Score |
+|----------|:-------------:|:------:|:------:|:------:|:------:|
+| TFIDF_LSA |  [LSA](./src/lsa_baseline/README.md) | (avg 10-fold CV) |  0.9658 | 0.9302 | 0.9281 |
+| Stloymetric features | [handcrafted-features](./src/statistical_baseline/README.md) | (avg 10-fold CV) | 0.7861 | 0.7903 | 0.7805 |
+| sentence_bert | [distilbert-base-nli-mean-tokens](./src/sentence_bert/sentence_transformers/README.md) |   (avg 10-fold CV) | 0.9365 | 0.9124 | 0.9113 |
+| sentence_bert | [roberta-large-nli-stsb-mean-tokens](./src/sentence_bert/sentence_transformers/README.md) |   (avg 10-fold CV) | 0.9623 | 0.9184 | 0.9142 |
+| sentence_bert | [xlm-r-large-en-ko-nli-ststb](./src/sentence_bert/sentence_transformers/README.md) |   (avg 10-fold CV) |0.9376 | 0.9226 | 0.9124 |
+| distilBERT | [distilBERT-tokenizer](./src/distilBERT/README.md) |  x  | 0.9933 | 0.9807 | 0.9708
+| stacking_probs | [lsa_sentence_bert_stlyometrics](./src/sentence_bert/stacking) |  NN | 0.9710 | 0.9380 | 0.9390 |
+| stacking | [lsa_sentence_bert_stlyometrics](./src/sentence_bert/stacking) | (10-fold CV) | 0.9695 | 0.9445 | 0.9425 |
+| linear_SVM | [Tax2Vec-+-tf-idf](./src/tax2vec/README.md) |  |  | 0.94 | 0.92 |
+| linear_SVM | [Tax2Vec(knowledge graph)-+-tf-idf](./src/tax2vec_knowledge_graphs/README.md) |  |  | 0.93 | 0.93 |
+| gradient_boosting | [Tax2Vec(knowledge graph)-+-tf-idf-+-distilBERT_tokenization](.) |  |  | 0.94 | 0.92 |
+
+
+## CV FINAL
+
+| Model name   |      Vectorization      |  10-fold CV  |
+|----------|:-------------:|:------:|
+| TFIDF_LSA |  [LSA](./src/lsa_baseline/README.md) |   0.943574  |
+| sentence_bert | [distilbert-base-nli-mean-tokens](./src/sentence_bert/sentence_transformers/README.md) |0.9071  |
+| sentence_bert | [roberta-large-nli-stsb-mean-tokens](./src/sentence_bert/sentence_transformers/README.md) | 0.9077  |
+| sentence_bert | [xlm-roberta-base](./src/sentence_bert/sentence_transformers/README.md) | 0.9123 |
+| Tax2Vec | [Tax2Vec-+-tf-idf](./src/tax2vec/README.md) | 0.9335 |  
+| Tax2Vec - KG | [distilBERT-tokenizer](./src/distilBERT/README.md) | 0.9350 |  
+
+
+
 ## Current results
 
 | Model name   |      Vectorization      |  Train score | Validation Score |
@@ -41,18 +71,4 @@
 | linear_SVM | [Tax2Vec(knowledge graph)-+-tf-idf](./src/tax2vec_knowledge_graphs/README.md) |    | 0.93 | 0.93 |
 | gradient_boosting | [Tax2Vec(knowledge graph)-+-tf-idf-+-distilBERT_tokenization](.) |    | 0.92 | 0.94 |
 
-## Results Train Dev Test split (EVALUATION BK)
 
-| Model name   |      Vectorization      |   Train tactic | Train score | DEV score |  Test Score |
-|----------|:-------------:|:------:|:------:|:------:|:------:|
-| TFIDF_LSA |  [LSA](./src/lsa_baseline/README.md) | (avg 10-fold CV) |  0.9658 | 0.9302 | 0.9281 |
-| Stloymetric features | [handcrafted-features](./src/statistical_baseline/README.md) | (avg 10-fold CV) | 0.7861 | 0.7903 | 0.7805 |
-| sentence_bert | [distilbert-base-nli-mean-tokens](./src/sentence_bert/sentence_transformers/README.md) |   (avg 10-fold CV) | 0.9365 | 0.9124 | 0.9113 |
-| sentence_bert | [roberta-large-nli-stsb-mean-tokens](./src/sentence_bert/sentence_transformers/README.md) |   (avg 10-fold CV) | 0.9623 | 0.9184 | 0.9142 |
-| sentence_bert | [xlm-r-large-en-ko-nli-ststb](./src/sentence_bert/sentence_transformers/README.md) |   (avg 10-fold CV) |0.9376 | 0.9226 | 0.9124 |
-| distilBERT | [distilBERT-tokenizer](./src/distilBERT/README.md) |  x  | 0.9933 | 0.9807 | 0.9708
-| stacking_probs | [lsa_sentence_bert_stlyometrics](./src/sentence_bert/stacking) |  NN | 0.9710 | 0.9380 | 0.9390 |
-| stacking | [lsa_sentence_bert_stlyometrics](./src/sentence_bert/stacking) | (10-fold CV) | 0.9695 | 0.9445 | 0.9425 |
-| linear_SVM | [Tax2Vec-+-tf-idf](./src/tax2vec/README.md) |  |  | 0.94 | 0.92 |
-| linear_SVM | [Tax2Vec(knowledge graph)-+-tf-idf](./src/tax2vec_knowledge_graphs/README.md) |  |  | 0.93 | 0.93 |
-| gradient_boosting | [Tax2Vec(knowledge graph)-+-tf-idf-+-distilBERT_tokenization](.) |  |  | 0.94 | 0.92 |

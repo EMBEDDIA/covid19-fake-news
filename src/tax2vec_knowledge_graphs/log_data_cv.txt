@@ -1,0 +1,18 @@
+[Parallel(n_jobs=-1)]: Using backend LokyBackend with 8 concurrent workers.
+[Parallel(n_jobs=-1)]: Done   6 out of  10 | elapsed:  6.0min remaining:  4.0min
+[Parallel(n_jobs=-1)]: Done  10 out of  10 | elapsed: 11.7min finished
+Scored: 0.9335402300955404
+[Parallel(n_jobs=-1)]: Using backend LokyBackend with 8 concurrent workers.
+[Parallel(n_jobs=-1)]: Done   6 out of  10 | elapsed:    5.3s remaining:    3.5s
+[Parallel(n_jobs=-1)]: Done  10 out of  10 | elapsed:    8.7s finished
+Scored: 0.9235632870858088
+[Parallel(n_jobs=-1)]: Using backend LokyBackend with 8 concurrent workers.
+[Parallel(n_jobs=-1)]: Done   6 out of  10 | elapsed:   28.7s remaining:   19.1s
+[Parallel(n_jobs=-1)]: Done  10 out of  10 | elapsed:   41.1s finished
+Scored: 0.9350182121670827
+[Parallel(n_jobs=-1)]: Using backend LokyBackend with 8 concurrent workers.
+[Parallel(n_jobs=-1)]: Done   6 out of  10 | elapsed:   36.2s remaining:   24.1s
+[Parallel(n_jobs=-1)]: Done  10 out of  10 | elapsed:   52.2s finished
+Scored: 0.41307849150534015
+Train score:
+0.9350182121670827

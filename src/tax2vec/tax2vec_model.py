@@ -28,7 +28,7 @@ from scipy.sparse import coo_matrix, hstack
 from skopt import BayesSearchCV
 from sklearn.ensemble import RandomForestClassifier,GradientBoostingClassifier
 
-
+import pandas as pd
 def load(path="pickles"):
     with open(os.path.join(path, "tax2vec.pkl"), "rb") as f:
         tax2vec = pickle.load(f)
@@ -37,9 +37,9 @@ def load(path="pickles"):
 
 
 def save(tax2vec, tokenizer, path="pickles"):
-    with open(os.path.join(path, "tax2vec.pkl"), "wb") as f:
+    with open(os.path.join(path, "tax2vec_cv.pkl"), "wb") as f:
         pickle.dump(tax2vec, f)
-    with open(os.path.join(path, "tokenizer.pkl"), "wb") as f:
+    with open(os.path.join(path, "tokenizer_cv.pkl"), "wb") as f:
         pickle.dump(tokenizer, f)
 
 def _import():
@@ -113,16 +113,16 @@ def get_features(data_train, data_validation, data_test):
 
     return features_train,features_validation, features_test
     
-def train(X, y_train, X_validation, Y_validation):
+def train(X, ys):
     new_train_y = []
 
-    for y in y_train:
+    for y in ys:
         if isinstance(y, list):
             new_train_y.append(list(y).index(1))
         else:
             new_train_y.append(y)
 
-    classifiers = [GradientBoostingClassifier(), RandomForestClassifier(n_estimators=10), svm.SVC(probability=True), SGDClassifier()]
+    classifiers = [GradientBoostingClassifier(), RandomForestClassifier(n_estimators=10), LogisticRegression(max_iter=1000), SGDClassifier(loss="hinge", penalty = "l2")]
     best_classifier = classifiers[0]
     best_score = 0
     for classifier in range(len(classifiers)):
@@ -141,7 +141,7 @@ def train(X, y_train, X_validation, Y_validation):
 
         clf = classifiers[classifier]
         #clf.fit(X, new_train_y)
-        clf_score = cross_val_score(clf, X, new_train_y, scoring="f1", cv = 10).mean()
+        clf_score = cross_val_score(clf, X, new_train_y, verbose = 1, n_jobs = -1, scoring="f1", cv = 10).mean()
         print("Scored: " + str(clf_score))
         if clf_score > best_score:
             best_score = clf_score
@@ -150,8 +150,6 @@ def train(X, y_train, X_validation, Y_validation):
     print("Train score:")
     print(best_score)
     return_classifier = best_classifier.fit(X, new_train_y)
-    print("On validation set:")
-    print(evaluate(return_classifier, X_validation, Y_validation))
     return return_classifier
     
 def export():
@@ -197,29 +195,37 @@ if __name__ == "__main__":
     data_train = parse_data.get_train()
 
     #features_train, features_validation, features_test = get_features(data_train, data_validation, data_test)
-
+    
     #pd.DataFrame(features_train.toarray()).to_csv("train_features.csv")
     #pd.DataFrame(features_validation.toarray()).to_csv("validation_features.csv")
     #pd.DataFrame(features_test.toarray()).to_csv("test_features.csv")
 
 
     s = pd.read_csv('features/train_features.csv', sep=',')
-    features_train = pd.DataFrame(s.to_numpy())
+    features_train = s.to_numpy()
 
     s = pd.read_csv('features/validation_features.csv', sep=',')
-    features_validation = pd.DataFrame(s.to_numpy())
+    features_validation = s.to_numpy()
 
     s = pd.read_csv('features/test_features.csv', sep=',')
-    features_test = pd.DataFrame(s.to_numpy())
+    features_test = s.to_numpy()
 
     #model = _import()
 
-    model = train(features_train, data_train['label'].to_list(), features_validation, data_validation['label'].to_list())
-    print("Evaluating test set:")
-    evaluate(model, features_test, data_test['label'].to_list())
+    #model = train(features_train, data_train['label'].to_list(), features_validation, data_validation['label'].to_list())
+    #print("Evaluating test set:")
+    #evaluate(model, features_test, data_test['label'].to_list())
 
     ## save model with pickle
-    with open(os.path.join("clf_en.pkl"), mode='wb') as f:
+    features = np.vstack((features_train,features_validation))
+    X = np.vstack((features, features_test))
+    print(X.shape)
+    print("DATA PREPARED")
+    ys = data_train['label'].to_list() + data_validation['label'].to_list() + data_test['label'].to_list()
+    model = train(X, ys)
+
+    
+    with open(os.path.join("clf_en_cv.pkl"), mode='wb') as f:
         pickle.dump(model, f)
 
     #print(fit(data_test['text_a']))
