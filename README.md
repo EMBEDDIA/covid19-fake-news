@@ -39,14 +39,14 @@
 
 | Model name   |      Vectorization      |  10-fold CV  |
 |----------|:-------------:|:------:|
-| TFIDF_LSA |  [LSA](./src/lsa_baseline/README.md) |   0.943574  |
+| TFIDF_LSA |  [LSA](./src/lsa_baseline/README.md) |   0.9436  |
 | sentence_bert | [distilbert-base-nli-mean-tokens](./src/sentence_bert/sentence_transformers/README.md) |0.9071  |
 | sentence_bert | [roberta-large-nli-stsb-mean-tokens](./src/sentence_bert/sentence_transformers/README.md) | 0.9077  |
 | sentence_bert | [xlm-roberta-base](./src/sentence_bert/sentence_transformers/README.md) | 0.9123 |
 | Tax2Vec | [Tax2Vec-+-tf-idf](./src/tax2vec/README.md) | 0.9335 |  
 | Tax2Vec - KG | [distilBERT-tokenizer](./src/distilBERT/README.md) | 0.9350 |  
 
-
+<!---
 
 ## Current results
 
@@ -70,5 +70,5 @@
 | linear_SVM | [Tax2Vec-+-tf-idf](./src/tax2vec/README.md) |    | 0.92 | 0.94 |
 | linear_SVM | [Tax2Vec(knowledge graph)-+-tf-idf](./src/tax2vec_knowledge_graphs/README.md) |    | 0.93 | 0.93 |
 | gradient_boosting | [Tax2Vec(knowledge graph)-+-tf-idf-+-distilBERT_tokenization](.) |    | 0.92 | 0.94 |
-
+-->
 
